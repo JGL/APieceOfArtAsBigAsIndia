@@ -1,0 +1,36 @@
+{
+  "name": "a_piece_of_art_as_big_as_india",
+  "version": "1.0.0",
+  "description": "An augmented reality sculpture accessible via the WWW, SMS and Mobile Devices",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JGL/APieceOfArtAsBigAsIndia.git"
+  },
+  "keywords": [
+    "augmented",
+    "reality",
+    "india",
+    "sculpture",
+    "a-frame"
+  ],
+  "author": "Joel Gethin Lewis",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JGL/APieceOfArtAsBigAsIndia/issues"
+  },
+  "homepage": "https://github.com/JGL/APieceOfArtAsBigAsIndia#readme",
+  "dependencies": {
+    "browser-sync": "^2.17.5",
+    "express": "^4.14.0",
+    "gulp": "^3.9.1",
+    "gulp-less": "^3.1.0",
+    "gulp-pug": "^3.1.0"
+  }
+}
