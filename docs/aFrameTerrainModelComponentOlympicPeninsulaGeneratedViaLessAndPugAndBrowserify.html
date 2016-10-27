@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>A-Frame Terrain Model Component - Olympic Peninsula made via Less and Pug and Browserify</title>
+    <meta name="description" content="A-Frame Terrain Model Component - Olympic Peninsula made via Less and Pug and Browserify">
+    <script src="build.js"></script>
+    <link href="style.css" rel="stylesheet" media="all">
+  </head>
+  <body>
+    <a-scene antialias="true">
+      <!--Is this assets line even necessary?-->
+      <a-assets></a-assets>
+      <!--Camera-->
+      <a-entity position="100 40 70" rotation="0 30 0">
+        <a-entity camera look-controls wasd-controls></a-entity>
+      </a-entity>
+      <!--Terrain-->
+      <a-entity terrain-model="DEM: url(aframe-terrain-model-component/docs/Olympic-Peninsula/data/clipped-envi.bin); texture: url(aframe-terrain-model-component/docs/Olympic-Peninsula/data/olympic-texture.jpg); planeWidth: 287; planeHeight: 151; segmentsWidth: 287; segmentsHeight: 151; zPosition: 50;"></a-entity>
+      <!--Sky-->
+      <a-sky color="grey"></a-sky>
+      <!--Light-->
+      <a-entity light="type: ambient; color: #0xeeeeee"></a-entity>
+    </a-scene>
+  </body>
+</html>
