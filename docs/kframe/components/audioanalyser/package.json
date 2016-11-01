@@ -1,0 +1,38 @@
+{
+  "name": "aframe-audioanalyser-component",
+  "version": "3.0.0",
+  "description": "Audio visualizations in A-Frame using Web Audio (AnalyserNode)",
+  "main": "index.js",
+  "scripts": {
+    "dist": "webpack index.js dist/aframe-audioanalyser-component.js && webpack -p index.js dist/aframe-audioanalyser-component.min.js",
+    "postpublish": "npm run dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ngokevin/kframe.git"
+  },
+  "keywords": [
+    "aframe",
+    "aframe-component",
+    "aframe-vr",
+    "vr",
+    "mozvr",
+    "webvr"
+  ],
+  "author": "Kevin Ngo <me@ngokevin.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ngokevin/kframe/issues"
+  },
+  "homepage": "https://github.com/ngokevin/tree/components/audio-analyser#readme",
+  "devDependencies": {
+    "aframe-bmfont-text-component": "^0.1.4",
+    "aframe-entity-generator-component": "^0.1.0",
+    "aframe-layout-component": "^1.2.0",
+    "aframe-template-component": "^3.1.1",
+    "browserify": "^12.0.1",
+    "budo": "^7.1.0",
+    "shelljs": "^0.6.0",
+    "webpack": "^1.12.9"
+  }
+}

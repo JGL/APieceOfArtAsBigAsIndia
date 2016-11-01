@@ -28,6 +28,8 @@
   "homepage": "https://github.com/JGL/APieceOfArtAsBigAsIndia#readme",
   "dependencies": {
     "aframe": "^0.3.2",
+    "aframe-extras": "^2.6.0",
+    "aframe-mountain-component": "^0.3.1",
     "aframe-terrain-model-component": "^0.1.0",
     "browser-sync": "^2.17.5",
     "browserify": "^13.1.1",

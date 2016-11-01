@@ -1,0 +1,21 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    title A-Frame Ocean Component Water Demo
+    meta(name='description', content='A-Frame Ocean Component Water Demo')
+    script(src='build.js')
+    link(href="style.css", rel="stylesheet", media="all")
+  body
+    a-scene(fog='type: exponential; color: #FFF; density: 0.06;')
+      //Camera
+      a-entity(camera universal-controls='movementEnabled: false' position='0 1.764 0')
+      //Ocean
+      a-ocean(width='50' depth='50' density='40')
+      //Pedestals
+      a-cylinder(radius='1' height='50' color='#39BB82' position='0 -24.5 0')
+      a-cylinder(radius='1' height='50' color='#39BB82' position='5 -24.5 0')
+      a-cylinder(radius='1' height='50' color='#39BB82' position='-5 -24.5 0')
+      //Lighting
+      a-entity(light='type: hemisphere; color: #AAA; groundColor: #000000; intensity: 0.9;')
+      a-entity(light='type: ambient; color: #DC8874; intensity: 0.5;')

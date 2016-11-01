@@ -1,0 +1,48 @@
+{
+  "name": "aframe-redux-component",
+  "version": "3.0.1",
+  "description": "Hook in Redux reducers, data bindings, and action dispatches for A-Frame",
+  "main": "index.js",
+  "scripts": {
+    "dist": "npm run dist:min && npm run dist:max",
+    "dist:max": "webpack",
+    "dist:min": "NODE_ENV=production webpack",
+    "lint": "semistandard -v | snazzy",
+    "postpublish": "npm run dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ngokevin/kframe.git"
+  },
+  "keywords": [
+    "aframe",
+    "aframe-component",
+    "aframe-vr",
+    "vr",
+    "mozvr",
+    "webvr"
+  ],
+  "author": "Kevin Ngo <me@ngokevin.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ngokevin/kframe/issues"
+  },
+  "homepage": "https://github.com/ngokevin/kframe/tree/components/redux#readme",
+  "devDependencies": {
+    "aframe-bmfont-text-component": "^0.1.4",
+    "semistandard": "^8.0.0",
+    "shelljs": "^0.7.0",
+    "shx": "^0.1.1",
+    "snazzy": "^4.0.0",
+    "webpack": "^1.13.2"
+  },
+  "semistandard": {
+    "ignore": [
+      "examples/build.js",
+      "dist/**"
+    ]
+  },
+  "dependencies": {
+    "redux": "^3.5.2"
+  }
+}
