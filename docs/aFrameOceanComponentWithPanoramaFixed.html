@@ -36,6 +36,7 @@
         oceanObject3D.traverse( function( node ) {
           if( node.material ) { 
             node.material.side = THREE.DoubleSide;
+            node.material.needsUpdate = true;
           }
         });
       }

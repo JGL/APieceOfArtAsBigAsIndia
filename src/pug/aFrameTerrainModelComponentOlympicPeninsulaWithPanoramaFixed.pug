@@ -41,6 +41,7 @@ html
         landscapeObject3D.traverse( function( node ) {
           if( node.material ) { 
             node.material.side = THREE.DoubleSide;
+            node.material.needsUpdate = true;
           }
         });
         //this also works when typed into the console, but not programatically, found here: http://stackoverflow.com/questions/16027131/three-js-how-to-make-double-sided-object

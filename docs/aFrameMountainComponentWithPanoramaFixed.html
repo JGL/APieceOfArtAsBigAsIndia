@@ -36,6 +36,7 @@
         moutainObject3D.traverse( function( node ) {
           if( node.material ) { 
             node.material.side = THREE.BackSide; //just the back in this case to avoid glitches...
+            node.material.needsUpdate = true;
           }
         });
       }
