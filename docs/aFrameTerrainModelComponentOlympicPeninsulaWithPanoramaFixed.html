@@ -50,7 +50,8 @@
         //this also works when typed into the console, but not programatically, found here: http://stackoverflow.com/questions/16027131/three-js-how-to-make-double-sided-object
       }
       //Thanks to @pookage (http://www.beardeddevelopment.co.uk/) on the A-Frame Slack for pointing me in the correct direction:https://developer.mozilla.org/en/docs/Web/API/GlobalEventHandlers/onload
-      window.onload = changeMaterialSide;
+      //Thanks to @dietrich () for suggesting changing from window.onload = changeMaterialSide; to document.addEventListener(‘DOMContentLoaded’, changeMaterialSide);
+      document.addEventListener(‘DOMContentLoaded’, changeMaterialSide);
     </script>
   </body>
 </html>

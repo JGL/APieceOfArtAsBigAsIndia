@@ -37,6 +37,7 @@
     "gulp": "^3.9.1",
     "gulp-less": "^3.1.0",
     "gulp-pug": "^3.1.0",
+    "kframe": "^0.3.0",
     "vinyl-source-stream": "^1.1.0"
   }
 }

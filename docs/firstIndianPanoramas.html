@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>First Panoramas from India</title>
+    <meta name="description" content="360 panoramas from the British Council Location in Delhi">
+    <script src="build.js"></script>
+    <link href="style.css" rel="stylesheet" media="all">
+  </head>
+  <body>
+    <a-scene>
+      <!--Assets-->
+      <a-assets>
+        <audio id="click-sound" src="audio/click.ogg"></audio><img id="India9" src="img/firstPanoramas/R0010009.jpg"><img id="India9-thumb" src="img/firstPanoramas/R0010009_thumb.jpg"><img id="India10" src="img/firstPanoramas/R0010010.jpg"><img id="India10-thumb" src="img/firstPanoramas/R0010010_thumb.jpg"><img id="India11" src="img/firstPanoramas/R0010011.jpg"><img id="India11-thumb" src="img/firstPanoramas/R0010011_thumb.jpg"><img id="India12" src="img/firstPanoramas/R0010012.jpg"><img id="India12-thumb" src="img/firstPanoramas/R0010012_thumb.jpg"><img id="India13" src="img/firstPanoramas/R0010013.jpg"><img id="India13-thumb" src="img/firstPanoramas/R0010013_thumb.jpg"><img id="India14" src="img/firstPanoramas/R0010014.jpg"><img id="India14-thumb" src="img/firstPanoramas/R0010014_thumb.jpg"><img id="India15" src="img/firstPanoramas/R0010015.jpg"><img id="India15-thumb" src="img/firstPanoramas/R0010015_thumb.jpg"><img id="India16" src="img/firstPanoramas/R0010016.jpg"><img id="India16-thumb" src="img/firstPanoramas/R0010016_thumb.jpg"><img id="India17" src="img/firstPanoramas/R0010017.jpg"><img id="India17-thumb" src="img/firstPanoramas/R0010017_thumb.jpg"><img id="India18" src="img/firstPanoramas/R0010018.jpg"><img id="India18-thumb" src="img/firstPanoramas/R0010018_thumb.jpg"><img id="India19" src="img/firstPanoramas/R0010019.jpg"><img id="India19-thumb" src="img/firstPanoramas/R0010019_thumb.jpg"><img id="India20" src="img/firstPanoramas/R0010020.jpg"><img id="India20-thumb" src="img/firstPanoramas/R0010020_thumb.jpg"><img id="India21" src="img/firstPanoramas/R0010021.jpg"><img id="India21-thumb" src="img/firstPanoramas/R0010021_thumb.jpg"><img id="India22" src="img/firstPanoramas/R0010022.jpg"><img id="India22-thumb" src="img/firstPanoramas/R0010022_thumb.jpg"><img id="India23" src="img/firstPanoramas/R0010023.jpg"><img id="India23-thumb" src="img/firstPanoramas/R0010023_thumb.jpg">
+        <!--Specify Nunjucks-->
+        <script id="plane" type="text/nunjucks">
+          <a-plane class="link" height="1" width="1" material="shader:flat; src: {{ thumb }}" sound="on: click; src: #click-sound" event-set__1="_event: mousedown; scale: 1 1 1" event-set__2="_event: mouseup; scale: 1.2 1.2 1" event-set__3="_event: mouseenter; scale: 1.2 1.2 1" event-set__4="_event: mouseleave; scale: 1 1 1"></a-plane>
+        </script>
+      </a-assets>
+      <!--Panorama-->
+      <a-sky id="panorama" radius="10" src="#India9"></a-sky>
+      <!--Link-->
+      <a-entity id="links" layout="type: line; margin: 1.5" position="-3 -1 -4">
+        <!--Pass image sources to the template-->
+        <a-entity template="src: #plane" data-thumb="#India9-thumb"></a-entity>
+        <a-entity template="src: #plane" data-thumb="#India10-thumb"></a-entity>
+        <a-entity template="src: #plane" data-thumb="#India11-thumb"></a-entity>
+      </a-entity>
+      <!--Camera and Cursor-->
+      <a-camera>
+        <a-cursor id="cursor">
+          <a-animation begin="click" easing="ease-in" attribute="scale" fill="backwards" from="0.1 0.1 0.1" to="1 1 1" dur="150"></a-animation>
+          <a-animation begin="cursor-fusing" easing="ease-in" attribute="scale" from="1 1 1" to="0.1 0.1 0.1" dur="1500"></a-animation>
+        </a-cursor>
+      </a-camera>
+    </a-scene>
+  </body>
+</html>
