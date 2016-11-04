@@ -33,14 +33,15 @@ html
         //console.log(landscapeObject3D.children);
         for(var i in landscapeObject3D.children) {
             //for all the children of the landscapeObject3D, change the material side property to THREE.DoubleSide aka 2
-            landscapeObject3D.children[i].material.side = THREE.DoubleSide;
+            landscapeObject3D.children[i].material.side = THREE.BackSide;
         }
         //this works when typed into the console, but not here programmatically, found here: http://stackoverflow.com/questions/18613295/how-to-set-a-texture-on-a-object3d-child-mesh
-        landscapeObject3D.children[0].material.side = THREE.DoubleSide; 
+        landscapeObject3D.children[0].material.side = THREE.BackSide; 
         //this works when typed into console, but not here programmatically, found here: https://threejs.org/docs/#Reference/Materials/Material
         landscapeObject3D.traverse( function( node ) {
           if( node.material ) { 
-            node.material.side = THREE.DoubleSide;
+            //was previously THREE.DoubleSide; 
+            node.material.side = THREE.BackSide; //just the back in this case to avoid glitches...
             node.material.needsUpdate = true;
           }
         });
