@@ -1,0 +1,41 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    title A-Frame Mountain Component with Panoramic background
+    meta(name='description', content='A-Frame Mountain Component with Panoramic background')
+    script(src='build.js')
+    link(href="style.css", rel="stylesheet", media="all")
+  body
+    a-scene(antialias='true')
+      //Assets
+      a-assets
+        img(id='sky' src='firstPanorama/2016_10_18_FirstPanorama.JPG')
+      //Camera
+      a-entity(position='0 0 0' rotation='0 0 0')
+        a-entity(camera look-controls wasd-controls)
+      //Mountain, seems to be on a large scale!
+      a-mountain(id='mountain' position='0 2000 0')
+      //Sky
+      a-sky(src='#sky')
+      //Light
+      a-entity(light='type: ambient; color: #0xeeeeee')
+    script.
+      function changeMaterialSide(){
+        //testing that I can print to the console
+        console.log("A-Frame and the rest have loaded");
+        //Gaining access to the landscape element via it's ID
+        var moutainEl = document.querySelector('#mountain');
+        // Gaining access to the internal three.js object that the landscape component contains
+        var moutainObject3D = moutainEl.object3D;
+        console.log(moutainObject3D.parent);
+        console.log(moutainObject3D.children);
+        //See material properties here https://threejs.org/docs/#Reference/Materials/Material
+        moutainObject3D.traverse( function( node ) {
+          if( node.material ) { 
+            node.material.side = THREE.BackSide; //just the back in this case to avoid glitches...
+          }
+        });
+      }
+      //Thanks to @pookage (http://www.beardeddevelopment.co.uk/) on the A-Frame Slack for pointing me in the correct direction:https://developer.mozilla.org/en/docs/Web/API/GlobalEventHandlers/onload
+      window.onload = changeMaterialSide;

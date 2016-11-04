@@ -8,6 +8,7 @@ html
     link(href="style.css", rel="stylesheet", media="all")
   body
     a-scene(antialias='true')
+      //a-scene(antialias='true' stats) uncomment to get stats back
       //Assets
       a-assets
         img(id='sky' src='firstPanorama/2016_10_18_FirstPanorama.JPG')
@@ -15,8 +16,34 @@ html
       a-entity(position='0 0 0' rotation='0 0 0')
         a-entity(camera look-controls wasd-controls)
       //Terrain
-      a-entity(position='0 100 0' terrain-model='DEM: url(aframe-terrain-model-component/docs/Olympic-Peninsula/data/clipped-envi.bin); texture: url(aframe-terrain-model-component/docs/Olympic-Peninsula/data/olympic-texture.jpg); planeWidth: 287; planeHeight: 151; segmentsWidth: 287; segmentsHeight: 151; zPosition: 50;')
+      a-entity(id='landscape' position='0 100 0' terrain-model='DEM: url(aframe-terrain-model-component/docs/Olympic-Peninsula/data/clipped-envi.bin); texture: url(aframe-terrain-model-component/docs/Olympic-Peninsula/data/olympic-texture.jpg); planeWidth: 287; planeHeight: 151; segmentsWidth: 287; segmentsHeight: 151; zPosition: 50;')
       //Sky
       a-sky(src='#sky')
       //Light
       a-entity(light='type: ambient; color: #0xeeeeee')
+    script.
+      //testing that I can print to the console
+      //console.log("Hello world");
+      //Gaining access to the landscape element via it's ID
+      var landscapeEl = document.querySelector('#landscape');
+      // Gaining access to the internal three.js object that the landscape component contains
+      var landscapeObject3D = landscapeEl.object3D;
+      console.log(landscapeObject3D.parent);
+      console.log(landscapeObject3D.children);
+      for(var i in landscapeObject3D.children) {
+          //for all the children of the landscapeObject3D, change the material side property to THREE.DoubleSide aka 2
+          landscapeObject3D.children[i].material.side = THREE.DoubleSide;
+      }
+      //this works when typed into the console, but not here programmatically, found here: http://stackoverflow.com/questions/18613295/how-to-set-a-texture-on-a-object3d-child-mesh
+      landscapeObject3D.children[0].material.side = THREE.DoubleSide; 
+      //this works when typed into console, but not here programmatically, found here: https://threejs.org/docs/#Reference/Materials/Material
+      landscapeObject3D.traverse( function( node ) {
+        if( node.material ) {
+          node.material.side = THREE.DoubleSide;
+        }
+      });
+      //this also works when typed into the console, but not programatically, found here: http://stackoverflow.com/questions/16027131/three-js-how-to-make-double-sided-object
+
+
+
+
