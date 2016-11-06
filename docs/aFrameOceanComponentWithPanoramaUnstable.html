@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>A-Frame Ocean Component with Panoramic background</title>
+    <meta name="description" content="A-Frame Ocean Component with Panoramic background">
+    <script src="build.js"></script>
+    <link href="style.css" rel="stylesheet" media="all">
+  </head>
+  <body>
+    <a-scene antialias="true">
+      <!--Assets-->
+      <a-assets><img id="sky" src="firstPanorama/2016_10_18_FirstPanorama.JPG"></a-assets>
+      <!--Camera-->
+      <a-entity position="0 0 0" rotation="0 0 0">
+        <a-entity camera look-controls wasd-controls></a-entity>
+      </a-entity>
+      <!--Ocean-->
+      <a-ocean id="ocean" position="0 10 0" width="50" depth="50" density="40"></a-ocean>
+      <!--Sky-->
+      <a-sky src="#sky"></a-sky>
+      <!--Light-->
+      <a-entity light="type: ambient; color: #0xeeeeee"></a-entity>
+    </a-scene>
+    <script>
+      function changeMaterialSide(){
+        //testing that I can print to the console
+        console.log("A-Frame and the rest have loaded");
+        //Gaining access to the landscape element via it's ID
+        var oceanEl = document.querySelector('#ocean');
+        // Gaining access to the internal three.js object that the landscape component contains
+        var oceanObject3D = oceanEl.object3D;
+        console.log(oceanObject3D.parent);
+        console.log(oceanObject3D.children);
+        //See material properties here https://threejs.org/docs/#Reference/Materials/Material
+        oceanObject3D.traverse( function( node ) {
+          if( node.material ) { 
+            node.material.side = THREE.BackSide; //just the back in this case to avoid glitches...
+            node.material.needsUpdate = true;
+          }
+        });
+      }
+      //Thanks to @pookage (http://www.beardeddevelopment.co.uk/) on the A-Frame Slack for pointing me in the correct direction:https://developer.mozilla.org/en/docs/Web/API/GlobalEventHandlers/onload
+      window.onload = changeMaterialSide;
+    </script>
+  </body>
+</html>
