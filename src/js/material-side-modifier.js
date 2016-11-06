@@ -17,7 +17,7 @@ AFRAME.registerComponent('material-side-modifier', {
     console.log("The value of data (side) is ",side); //why isn't this reporting properly?
 
     //via http://stackoverflow.com/questions/18613295/how-to-set-a-texture-on-a-object3d-child-mesh
-    console.log("object3D has: ", object3D.children.length, " children.");
+    console.log("object3D has: ", object3D.children, " children.");
     for(var i in object3D.children) {
         //for all the children of the landscapeObject3D, change the material side property to THREE.DoubleSide aka 2
         console.log("(Method 1: The current number of sides is", object3D.children[i].material.side);
