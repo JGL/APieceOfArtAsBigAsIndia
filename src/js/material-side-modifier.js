@@ -2,8 +2,9 @@ AFRAME.registerComponent('material-side-modifier', {
   // This component can be used multiple times
   multiple: true,
   // Allow material-side-modifier component default to 2
+  // thanks to @fernandojsg on A-Frame slack for pointing out that the `type` key should be an object:
   schema: {
-  	type: 'int', default: 2 //just a single-property schema, parse and stringify should be inferred.
+    type: 'int', default: 2
   },
   // Update the side property of the material of the component to 2 aka THREE.DoubleSide, see: https://threejs.org/docs/#Reference/Materials/Material
   init: function () {
@@ -11,6 +12,7 @@ AFRAME.registerComponent('material-side-modifier', {
   	var object3D = this.el.object3D;
   	console.log("Object3D is ", object3D);
     var side = this.data; //should be 2, the default value
+    console.log("The type of data (side) is ",this.data.type); //why isn't this reporting properly?
     console.log("The value of data (side) is ",side); //why isn't this reporting properly?
 
     //this works when typed into console, but not here programmatically, found here: https://threejs.org/docs/#Reference/Materials/Material
