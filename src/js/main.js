@@ -13,3 +13,5 @@ require('aframe-layout-component');
 require('aframe-animation-component');
 require('./update-raycaster.js');
 require('./set-image.js');
+//making the bug re-appear for the issue I'm filling with A-Frame github
+require('./single-property-schema-bug.js');

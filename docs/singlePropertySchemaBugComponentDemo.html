@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Single Property Schema Bug Component Demo</title>
+    <meta name="description" content="Single Property Schema Bug Component Demo">
+    <script src="build.js"></script>
+    <link href="style.css" rel="stylesheet" media="all">
+  </head>
+  <body>
+    <a-scene antialias="true">
+      <!--Assets-->
+      <a-assets><img id="sky" src="firstPanorama/2016_10_18_FirstPanorama.JPG"></a-assets>
+      <!--Camera-->
+      <a-entity position="0 0 0" rotation="0 0 0">
+        <a-entity camera look-controls wasd-controls></a-entity>
+      </a-entity>
+      <!--Terrain-->
+      <a-entity id="landscape" position="0 100 0" terrain-model="DEM: url(aframe-terrain-model-component/docs/Olympic-Peninsula/data/clipped-envi.bin); texture: url(aframe-terrain-model-component/docs/Olympic-Peninsula/data/olympic-texture.jpg); planeWidth: 287; planeHeight: 151; segmentsWidth: 287; segmentsHeight: 151; zPosition: 50;" single-property-schema-bug></a-entity>
+      <!--Sky-->
+      <a-sky src="#sky"></a-sky>
+      <!--Light-->
+      <a-entity light="type: ambient;"></a-entity>
+    </a-scene>
+  </body>
+</html>

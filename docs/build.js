@@ -87535,7 +87535,6 @@ var extras = require('aframe-extras');
 // Register everything.
 extras.registerAll();
 require('aframe-mountain-component');
-//require('kframe');
 //requiring my first component! https://github.com/substack/browserify-handbook told me how to do this
 require('./material-side-modifier.js');
 //below are to complete the A-Frame docs component tutorial https://aframe.io/docs/0.3.0/guides/building-with-components.html
@@ -87545,16 +87544,23 @@ require('aframe-layout-component');
 require('aframe-animation-component');
 require('./update-raycaster.js');
 require('./set-image.js');
-},{"./material-side-modifier.js":55,"./set-image.js":56,"./update-raycaster.js":57,"aframe":49,"aframe-animation-component":1,"aframe-event-set-component":2,"aframe-extras":3,"aframe-layout-component":33,"aframe-mountain-component":34,"aframe-template-component":46,"aframe-terrain-model-component":47}],55:[function(require,module,exports){
+//making the bug re-appear for the issue I'm filling with A-Frame github
+require('./single-property-schema-bug.js');
+},{"./material-side-modifier.js":55,"./set-image.js":56,"./single-property-schema-bug.js":57,"./update-raycaster.js":58,"aframe":49,"aframe-animation-component":1,"aframe-event-set-component":2,"aframe-extras":3,"aframe-layout-component":33,"aframe-mountain-component":34,"aframe-template-component":46,"aframe-terrain-model-component":47}],55:[function(require,module,exports){
 AFRAME.registerComponent('material-side-modifier', {
   // This component can be used multiple times
   multiple: true,
   // Allow material-side-modifier component a single property schema, of type int, defaulting to 2
-  schema: { default: 2 },
+  schema: {
+    side: {
+      type:'int',
+      default: 2
+    }
+  },
   init: function () {
   	console.log("Inside of init() of material-side-modifier");
-    var side = this.data; //should be 2, the default value
-    console.log("The value of this.data is ", this.data); //why isn't this reporting properly?
+    var side = this.data.side; //should be 2, the default value
+    console.log("The value of this.data.side is ", this.data.side); //why isn't this reporting properly?
     console.log("The value of var side is ", side); //why isn't this reporting properly?
   }
 });
@@ -87646,6 +87652,19 @@ AFRAME.registerComponent('set-image', {
   }
 });
 },{}],57:[function(require,module,exports){
+AFRAME.registerComponent('single-property-schema-bug', {
+  // This component can be used multiple times
+  multiple: true,
+  // Allow material-side-modifier component a single property schema, of type int, defaulting to 2
+  schema: { default: 2 },
+  init: function () {
+  	console.log("Inside of init() of single-property-schema-bug");
+    var side = this.data; //should be 2, the default value
+    console.log("The value of this.data is ", this.data); //why isn't this reporting properly?
+    console.log("The value of var side is ", side); //why isn't this reporting properly?
+  }
+});
+},{}],58:[function(require,module,exports){
 AFRAME.registerComponent('update-raycaster', {
   schema: {
     type: 'selector'
