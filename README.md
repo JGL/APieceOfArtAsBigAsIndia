@@ -1,6 +1,17 @@
 # A piece of Art as big as India
 An augmented reality sculpture accessible via the WWW, SMS and Mobile Devices.
 
+To install the project locally, type the following commands:
+* git clone https://github.com/JGL/APieceOfArtAsBigAsIndia
+* cd APieceOfArtAsBigAsIndia
+* npm install
+
+You'll need node.js installed, I prefer to do that via [Homebrew on the Mac](http://brew.sh/). Once you have Homebrew installed, you can run:
+
+* brew install node
+
+To install Node.js, as well as NPM (Node Package Manager).
+
 [Blog posts](http://joelgethinlewis.com/category/projects/a-piece-of-art-as-big-as-india/) about the project.
 
 [Demonstration code](https://jgl.github.io/APieceOfArtAsBigAsIndia/) hosted on [GitHub Pages](https://pages.github.com/).
