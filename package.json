@@ -42,6 +42,7 @@
     "gulp-cli": "^1.2.2",
     "gulp-less": "^3.1.0",
     "gulp-pug": "^3.1.0",
+    "nodemon": "^1.11.0",
     "vinyl-source-stream": "^1.1.0"
   }
 }
