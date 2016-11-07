@@ -28,8 +28,12 @@
   "homepage": "https://github.com/JGL/APieceOfArtAsBigAsIndia#readme",
   "dependencies": {
     "aframe": "^0.3.2",
+    "aframe-animation-component": "^3.0.4",
+    "aframe-event-set-component": "^3.0.1",
     "aframe-extras": "^2.6.0",
+    "aframe-layout-component": "^3.0.1",
     "aframe-mountain-component": "^0.3.1",
+    "aframe-template-component": "^3.1.1",
     "aframe-terrain-model-component": "^0.1.0",
     "browser-sync": "^2.17.5",
     "browserify": "^13.1.1",
@@ -37,7 +41,6 @@
     "gulp": "^3.9.1",
     "gulp-less": "^3.1.0",
     "gulp-pug": "^3.1.0",
-    "kframe": "^0.3.0",
     "vinyl-source-stream": "^1.1.0"
   }
 }

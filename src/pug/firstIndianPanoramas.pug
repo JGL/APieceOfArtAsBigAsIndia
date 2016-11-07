@@ -42,23 +42,42 @@ html
         img(id='India23' src='img/firstPanoramas/R0010023.jpg')
         img(id='India23-thumb' src='img/firstPanoramas/R0010023_thumb.jpg')
         //Specify Nunjucks
-        script(id='plane' type='text/nunjucks')
+        script(id='link' type='text/nunjucks')
           a-plane(class='link' height='1' width='1'
-          material='shader:flat; src: {{ thumb }}' sound='on: click; src: #click-sound'
+          material='shader:flat; src: {{ thumb }}'
           event-set__1='_event: mousedown; scale: 1 1 1'
           event-set__2='_event: mouseup; scale: 1.2 1.2 1'
           event-set__3='_event: mouseenter; scale: 1.2 1.2 1'
-          event-set__4='_event: mouseleave; scale: 1 1 1')
+          event-set__4='_event: mouseleave; scale: 1 1 1'
+          set-image='on: click; target: #panorama; src: {{ src }}'
+          sound='on: click; src: #click-sound'
+          update-raycaster='#cursor'
+          )
       //Panorama
-      a-sky(id='panorama' radius='10' src='#India9')
+      a-sky(id='panorama' radius='20' src='#India9')
       //Link
-      a-entity(id='links' layout='type: line; margin: 1.5' position='-3 -1 -4')
+      a-entity(id='links' layout='type: box; columns: 4; margin: 1.5' position='-2.25 -2.25 -5')
         //Pass image sources to the template
-        a-entity(template='src: #plane' data-thumb='#India9-thumb')
-        a-entity(template='src: #plane' data-thumb='#India10-thumb')
-        a-entity(template='src: #plane' data-thumb='#India11-thumb')
+        a-entity(template='src: #link' data-src='#India9' data-thumb='#India9-thumb')
+        a-entity(template='src: #link' data-src='#India10' data-thumb='#India10-thumb')
+        a-entity(template='src: #link' data-src='#India11' data-thumb='#India11-thumb')
+        a-entity(template='src: #link' data-src='#India12' data-thumb='#India12-thumb')
+        a-entity(template='src: #link' data-src='#India13' data-thumb='#India13-thumb')
+        a-entity(template='src: #link' data-src='#India14' data-thumb='#India14-thumb')
+        a-entity(template='src: #link' data-src='#India15' data-thumb='#India15-thumb')
+        a-entity(template='src: #link' data-src='#India16' data-thumb='#India16-thumb')
+        a-entity(template='src: #link' data-src='#India17' data-thumb='#India17-thumb')
+        a-entity(template='src: #link' data-src='#India18' data-thumb='#India18-thumb')
+        a-entity(template='src: #link' data-src='#India19' data-thumb='#India19-thumb')
+        a-entity(template='src: #link' data-src='#India20' data-thumb='#India20-thumb')
+        a-entity(template='src: #link' data-src='#India21' data-thumb='#India21-thumb')
+        a-entity(template='src: #link' data-src='#India22' data-thumb='#India22-thumb')
+        a-entity(template='src: #link' data-src='#India23' data-thumb='#India23-thumb')
       //Camera and Cursor
-      a-camera
-        a-cursor(id='cursor')
-          a-animation(begin='click' easing='ease-in' attribute='scale' fill='backwards' from='0.1 0.1 0.1' to='1 1 1' dur='150')
-          a-animation(begin='cursor-fusing' easing='ease-in' attribute='scale' from='1 1 1' to='0.1 0.1 0.1' dur='1500')
+      a-entity(camera look-controls)
+        a-cursor(id='cursor'
+        animation__click='property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150'
+        animation__fusing='property: fusing; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500'
+        event-set__1 = '_event: mouseenter; color: springgreen'
+        event-set__2 = '_event: mouseleave; color: black'
+        raycaster = 'objects: .link')
