@@ -45,6 +45,6 @@ gulp.task('watch', function(){
 	gulp.watch('./src/less/**/*.less', [ 'less'])
 		.on('change', browserSync.reload);
 
-	gulp.watch('./src/js/main.js', [ 'browserify'])
+	gulp.watch('./src/js/**/*.js', [ 'browserify'])
 		.on('change', browserSync.reload);
 });
