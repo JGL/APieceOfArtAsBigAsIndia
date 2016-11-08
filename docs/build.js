@@ -87529,6 +87529,36 @@ module.exports = (function(){
 }())
 
 },{}],54:[function(require,module,exports){
+// Component to change to random colour on click, not functioning presently
+AFRAME.registerComponent('cursor-listener-terrain', {
+
+  init: function () {
+    this.el.addEventListener('click', function () {
+    	console.log('I was clicked!');
+	    if(this.el.getObject3D('terrain')){
+	    	var COLOURS = ['red', 'green', 'blue'];
+	    	var randomIndex = Math.floor(Math.random() * COLOURS.length);
+	    	//this.setAttribute('material', 'color', COLOURS[randomIndex]);
+	    	var terrain = this.el.getObject3D('terrain');
+	    	terrain.material.color = COLOURS[randomIndex];
+	    	console.log('I changed the colour!');
+	    }
+    });
+  }
+});
+},{}],55:[function(require,module,exports){
+// Component to change to random colour on click.
+AFRAME.registerComponent('cursor-listener', {
+  init: function () {
+    var COLORS = ['red', 'green', 'blue'];
+    this.el.addEventListener('click', function () {
+      var randomIndex = Math.floor(Math.random() * COLORS.length);
+      this.setAttribute('material', 'color', COLORS[randomIndex]);
+      console.log('I was clicked!');
+    });
+  }
+});
+},{}],56:[function(require,module,exports){
 require('aframe');
 require('aframe-terrain-model-component');
 var extras = require('aframe-extras');
@@ -87536,7 +87566,8 @@ var extras = require('aframe-extras');
 extras.registerAll();
 require('aframe-mountain-component');
 //requiring my first component! https://github.com/substack/browserify-handbook told me how to do this
-require('./material-side-modifier.js');
+require('./material-side-modifier.js'); //added to make sure old demo's keep working
+require('./material-side-modifier-terrain-model.js');
 //below are to complete the A-Frame docs component tutorial https://aframe.io/docs/0.3.0/guides/building-with-components.html
 require('aframe-event-set-component');
 require('aframe-template-component');
@@ -87546,10 +87577,75 @@ require('./update-raycaster.js');
 require('./set-image.js');
 //making the bug re-appear for the issue I'm filling with A-Frame github
 require('./single-property-schema-bug.js');
-},{"./material-side-modifier.js":55,"./set-image.js":56,"./single-property-schema-bug.js":57,"./update-raycaster.js":58,"aframe":49,"aframe-animation-component":1,"aframe-event-set-component":2,"aframe-extras":3,"aframe-layout-component":33,"aframe-mountain-component":34,"aframe-template-component":46,"aframe-terrain-model-component":47}],55:[function(require,module,exports){
-AFRAME.registerComponent('material-side-modifier', {
-  // This component can be used multiple times
-  multiple: true,
+//first interaction demo, not working properly:
+require('./cursor-listener-terrain.js');
+//second interaction demo, working with the Mountain component instead
+require('./material-side-modifier-mountain.js');
+require('./cursor-listener.js');
+//third interaction demo, working with the Ocean component instead
+require('./material-side-modifier-ocean.js');
+},{"./cursor-listener-terrain.js":54,"./cursor-listener.js":55,"./material-side-modifier-mountain.js":57,"./material-side-modifier-ocean.js":58,"./material-side-modifier-terrain-model.js":59,"./material-side-modifier.js":60,"./set-image.js":61,"./single-property-schema-bug.js":62,"./update-raycaster.js":63,"aframe":49,"aframe-animation-component":1,"aframe-event-set-component":2,"aframe-extras":3,"aframe-layout-component":33,"aframe-mountain-component":34,"aframe-template-component":46,"aframe-terrain-model-component":47}],57:[function(require,module,exports){
+AFRAME.registerComponent('material-side-modifier-mountain', {
+  // This component can be used only once
+  //multiple: true,
+  // Allow material-side-modifier component a single property schema, of type int, defaulting to 2, aka THREE.DoubleSide, see https://threejs.org/docs/#Reference/Materials/Material.side
+  schema: {
+    side: {
+      type:'int',
+      default: 2
+    }
+  },
+  tick: function(){
+          //testing that I can print to the console
+        //console.log("A-Frame and the rest have loaded");
+        //Gaining access to the landscape element via it's ID
+        var mountainEl = document.querySelector('#mountain');
+        // Gaining access to the internal three.js object that the landscape component contains
+        var mountainObject3D = mountainEl.object3D;
+        //console.log(moutainObject3D.parent);
+        //console.log(moutainObject3D.children);
+        //See material properties here https://threejs.org/docs/#Reference/Materials/Material
+        mountainObject3D.traverse( function( node ) {
+          if( node.material ) { 
+            node.material.side = THREE.DoubleSide; //just the back in this case to avoid glitches...
+            node.material.needsUpdate = true;
+          }
+        });
+  }, 
+});
+},{}],58:[function(require,module,exports){
+AFRAME.registerComponent('material-side-modifier-ocean', {
+  // This component can be used only once
+  //multiple: true,
+  // Allow material-side-modifier component a single property schema, of type int, defaulting to 2, aka THREE.DoubleSide, see https://threejs.org/docs/#Reference/Materials/Material.side
+  schema: {
+    side: {
+      type:'int',
+      default: 2
+    }
+  },
+  tick: function(){
+          //testing that I can print to the console
+        //console.log("A-Frame and the rest have loaded");
+        //Gaining access to the ocean element via it's ID
+        var oceanEl = document.querySelector('#ocean');
+        // Gaining access to the internal three.js object that the landscape component contains
+        var oceanObject3D = oceanEl.object3D;
+        //console.log(oceanObject3D.parent);
+        //console.log(oceanObject3D.children);
+        //See material properties here https://threejs.org/docs/#Reference/Materials/Material
+        oceanObject3D.traverse( function( node ) {
+          if( node.material ) {
+            node.material.side = THREE.DoubleSide; //just the back in this case to avoid glitches...
+            node.material.needsUpdate = true;
+          }
+        });
+  }, 
+});
+},{}],59:[function(require,module,exports){
+AFRAME.registerComponent('material-side-modifier-terrain-model', {
+  // This component cannot be used multiple times
+  //multiple: true,
   // Allow material-side-modifier component a single property schema, of type int, defaulting to 2, aka THREE.DoubleSide, see https://threejs.org/docs/#Reference/Materials/Material.side
   schema: {
     side: {
@@ -87577,7 +87673,36 @@ AFRAME.registerComponent('material-side-modifier', {
     //   }
     // );
     // console.log("Finished traverse of object3D");
-},{}],56:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
+AFRAME.registerComponent('material-side-modifier', {
+  // This component can be used only once
+  //multiple: true,
+  // Allow material-side-modifier component a single property schema, of type int, defaulting to 2, aka THREE.DoubleSide, see https://threejs.org/docs/#Reference/Materials/Material.side
+  schema: {
+    side: {
+      type:'int',
+      default: 2
+    }
+  },
+  tick: function(){
+          //testing that I can print to the console
+        //console.log("A-Frame and the rest have loaded");
+        //Gaining access to the landscape element via it's ID
+        var moutainEl = document.querySelector('#mountain');
+        // Gaining access to the internal three.js object that the landscape component contains
+        var moutainObject3D = moutainEl.object3D;
+        //console.log(moutainObject3D.parent);
+        //console.log(moutainObject3D.children);
+        //See material properties here https://threejs.org/docs/#Reference/Materials/Material
+        moutainObject3D.traverse( function( node ) {
+          if( node.material ) { 
+            node.material.side = THREE.DoubleSide; //just the back in this case to avoid glitches...
+            node.material.needsUpdate = true;
+          }
+        });
+  }, 
+});
+},{}],61:[function(require,module,exports){
 /**
  * Component that listens to an event, fades out an entity, swaps the texture, and fades it
  * back in.
@@ -87629,7 +87754,7 @@ AFRAME.registerComponent('set-image', {
     });
   }
 });
-},{}],57:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 AFRAME.registerComponent('single-property-schema-bug', {
   // This component can be used multiple times
   multiple: true,
@@ -87642,7 +87767,7 @@ AFRAME.registerComponent('single-property-schema-bug', {
     console.log("The value of var side is ", side); //why isn't this reporting properly?
   }
 });
-},{}],58:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 AFRAME.registerComponent('update-raycaster', {
   schema: {
     type: 'selector'
@@ -87652,4 +87777,4 @@ AFRAME.registerComponent('update-raycaster', {
     this.data.components.raycaster.refreshObjects();
   }
 });
-},{}]},{},[54]);
+},{}]},{},[56]);
