@@ -31,5 +31,5 @@ html
         console.log("Mouse down");
         //Gaining access to the landscape element via it's ID
         var mountainEl = document.querySelector('#mountain');
-        mountainEl.update();
+        mountainEl.components['mountain'].update(); //tip from Don McCurdy
       });
