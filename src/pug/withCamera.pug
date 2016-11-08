@@ -2,8 +2,8 @@ doctype html
 html
   head
     meta(charset='utf-8')
-    title Mountain Component with Mouse Interaction
-    meta(name='description', content='Mountain Component with collider check via Raycaster')
+    title Mountain Component with Live Video Background
+    meta(name='description', content='Mountain Component with Live Video Background')
     script(src='build.js')
     link(href="style.css", rel="stylesheet", media="all")
   body
@@ -11,9 +11,9 @@ html
     a-scene(antialias='true')
       //Camera
       a-entity(position='0 0 0' rotation='0 0 0')
-        a-entity(camera look-controls wasd-controls)
+        a-entity(camera look-controls)
       //Mountain, seems to be on a large scale!
-      a-mountain(id='mountain' color='rgb(128,0,128)' shadowColor='rgb(255,165,0)' position='0 2000 0' class="clickable" material-side-modifier-mountain collider-check-and-update)
+      a-mountain(id='mountain' color='rgb(128,0,128)' shadowColor='rgb(255,165,0)' position='0 2000 0' material-side-modifier-mountain)
       //Light
       a-entity(light='type: ambient;')
     script.
