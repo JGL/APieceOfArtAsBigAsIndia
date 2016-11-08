@@ -8,7 +8,7 @@ AFRAME.registerComponent('collider-check-and-update', {
       //update(); //this errors with Uncaught ReferenceError: update is not defined
       //this.update(); //this doesn't error, but doesn't do anything
       //this.el.update(); //this errors with Cannot read property 'update' of undefined
-      el.components['mountain'].update(); //tip from Don McCurdy
+      this.el.components['mountain'].update(); //tip from Don McCurdy
     });
   }
 });
