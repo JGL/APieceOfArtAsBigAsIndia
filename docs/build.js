@@ -87529,6 +87529,20 @@ module.exports = (function(){
 }())
 
 },{}],54:[function(require,module,exports){
+AFRAME.registerComponent('collider-check-and-update', {
+  dependencies: ['raycaster'],
+  init: function () {
+    this.el.addEventListener('raycaster-intersected', function () {
+      console.log('Player hit something!');
+      //console.log(this);
+      //trying too call the update() method of the Mountain component to which this event listener is now attached
+      update(); //this errors with Uncaught ReferenceError: update is not defined
+      this.update(); //this doesn't error, but doesn't do anything
+      this.el.update(); //this errors with Cannot read property 'update' of undefined
+    });
+  }
+});
+},{}],55:[function(require,module,exports){
 AFRAME.registerComponent('collider-check', {
   dependencies: ['raycaster'],
   init: function () {
@@ -87537,7 +87551,7 @@ AFRAME.registerComponent('collider-check', {
     });
   }
 });
-},{}],55:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 // Component to change to random colour on click, not functioning presently
 AFRAME.registerComponent('cursor-listener-terrain', {
 
@@ -87555,7 +87569,7 @@ AFRAME.registerComponent('cursor-listener-terrain', {
     });
   }
 });
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 // Component to change to random colour on click.
 AFRAME.registerComponent('cursor-listener', {
   init: function () {
@@ -87569,7 +87583,7 @@ AFRAME.registerComponent('cursor-listener', {
     console.log("cursor-listener.js init end");
   }
 });
-},{}],57:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 require('aframe');
 require('aframe-terrain-model-component');
 var extras = require('aframe-extras');
@@ -87597,7 +87611,9 @@ require('./cursor-listener.js');
 require('./material-side-modifier-ocean.js');
 //using the Raycaster cocumentation, adding a collider-check component: https://aframe.io/docs/0.3.0/components/raycaster.html
 require('./collider-check.js');
-},{"./collider-check.js":54,"./cursor-listener-terrain.js":55,"./cursor-listener.js":56,"./material-side-modifier-mountain.js":58,"./material-side-modifier-ocean.js":59,"./material-side-modifier-terrain-model.js":60,"./material-side-modifier.js":61,"./set-image.js":62,"./single-property-schema-bug.js":63,"./update-raycaster.js":64,"aframe":49,"aframe-animation-component":1,"aframe-event-set-component":2,"aframe-extras":3,"aframe-layout-component":33,"aframe-mountain-component":34,"aframe-template-component":46,"aframe-terrain-model-component":47}],58:[function(require,module,exports){
+//now trying to run the update() method of an attached component using the collider to attach
+require('./collider-check-and-update.js');
+},{"./collider-check-and-update.js":54,"./collider-check.js":55,"./cursor-listener-terrain.js":56,"./cursor-listener.js":57,"./material-side-modifier-mountain.js":59,"./material-side-modifier-ocean.js":60,"./material-side-modifier-terrain-model.js":61,"./material-side-modifier.js":62,"./set-image.js":63,"./single-property-schema-bug.js":64,"./update-raycaster.js":65,"aframe":49,"aframe-animation-component":1,"aframe-event-set-component":2,"aframe-extras":3,"aframe-layout-component":33,"aframe-mountain-component":34,"aframe-template-component":46,"aframe-terrain-model-component":47}],59:[function(require,module,exports){
 AFRAME.registerComponent('material-side-modifier-mountain', {
   // This component can be used only once
   //multiple: true,
@@ -87626,7 +87642,7 @@ AFRAME.registerComponent('material-side-modifier-mountain', {
         });
   }, 
 });
-},{}],59:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 AFRAME.registerComponent('material-side-modifier-ocean', {
   // This component can be used only once
   //multiple: true,
@@ -87655,7 +87671,7 @@ AFRAME.registerComponent('material-side-modifier-ocean', {
         });
   }, 
 });
-},{}],60:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 AFRAME.registerComponent('material-side-modifier-terrain-model', {
   // This component cannot be used multiple times
   //multiple: true,
@@ -87686,7 +87702,7 @@ AFRAME.registerComponent('material-side-modifier-terrain-model', {
     //   }
     // );
     // console.log("Finished traverse of object3D");
-},{}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 AFRAME.registerComponent('material-side-modifier', {
   // This component can be used only once
   //multiple: true,
@@ -87715,7 +87731,7 @@ AFRAME.registerComponent('material-side-modifier', {
         });
   }, 
 });
-},{}],62:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 /**
  * Component that listens to an event, fades out an entity, swaps the texture, and fades it
  * back in.
@@ -87767,7 +87783,7 @@ AFRAME.registerComponent('set-image', {
     });
   }
 });
-},{}],63:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 AFRAME.registerComponent('single-property-schema-bug', {
   // This component can be used multiple times
   multiple: true,
@@ -87780,7 +87796,7 @@ AFRAME.registerComponent('single-property-schema-bug', {
     console.log("The value of var side is ", side); //why isn't this reporting properly?
   }
 });
-},{}],64:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 AFRAME.registerComponent('update-raycaster', {
   schema: {
     type: 'selector'
@@ -87790,4 +87806,4 @@ AFRAME.registerComponent('update-raycaster', {
     this.data.components.raycaster.refreshObjects();
   }
 });
-},{}]},{},[57]);
+},{}]},{},[58]);

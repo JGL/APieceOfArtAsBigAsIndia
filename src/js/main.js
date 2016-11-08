@@ -25,3 +25,5 @@ require('./cursor-listener.js');
 require('./material-side-modifier-ocean.js');
 //using the Raycaster cocumentation, adding a collider-check component: https://aframe.io/docs/0.3.0/components/raycaster.html
 require('./collider-check.js');
+//now trying to run the update() method of an attached component using the collider to attach
+require('./collider-check-and-update.js');
