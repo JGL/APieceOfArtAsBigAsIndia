@@ -25,11 +25,21 @@ html
       //Light
       a-entity(light='type: ambient;')
     script.
-      document.addEventListener("click", function(){
-        //via http://www.w3schools.com/jsref/met_document_addeventlistener.asp
-        //and https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
-        console.log("Mouse down");
+      function generateNewMountain() {
+        //how to make functions http://www.w3schools.com/js/js_functions.asp
         //Gaining access to the landscape element via it's ID
         var mountainEl = document.querySelector('#mountain');
         mountainEl.components['mountain'].update(); //tip from Don McCurdy
+      }
+      document.addEventListener("click", function(){
+        //via http://www.w3schools.com/jsref/met_document_addeventlistener.asp
+        //and https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
+        console.log("Click event");
+        generateNewMountain();
+      });
+      document.addEventListener("touchend", function(){
+        //via https://developer.mozilla.org/en-US/docs/Web/Events/touchend
+        //and https://developer.apple.com/library/content/documentation/AppleApplications/Reference/SafariWebContent/HandlingEvents/HandlingEvents.html#//apple_ref/doc/uid/TP40006511-SW6
+        console.log("Touchend event");
+        generateNewMountain();
       });
