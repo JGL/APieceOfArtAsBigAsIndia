@@ -1,0 +1,33 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    title Mountain Component with Mouse Interaction
+    meta(name='description', content='Mountain Component with collider check via Raycaster')
+    script(src='build.js')
+    link(href="style.css", rel="stylesheet", media="all")
+  body
+    a-scene(antialias='true')
+      //Assets
+      a-assets
+        img(id='sky' src='firstPanorama/2016_10_18_FirstPanorama.JPG')
+      //Camera
+      a-entity(position='0 0 0' rotation='0 0 0')
+        a-entity(camera look-controls wasd-controls)
+          a-entity(raycaster='objects: .clickable' cursor='fuse: true; fuseTimeout: 500'
+            position='0 0 -10'
+            geometry='primitive: ring'
+            material='color: black; shader: flat')
+      //Mountain, seems to be on a large scale!
+      a-mountain(id='mountain' color='rgb(128,0,128)' shadowColor='rgb(255,165,0)' position='0 2000 0' class="clickable" material-side-modifier-mountain collider-check-and-update)
+      //Sky
+      a-sky(src='#sky')
+      //Light
+      a-entity(light='type: ambient;')
+    script.
+      function onDocumentMouseDown( event ) {
+        console.log("Mouse down");
+        //Gaining access to the landscape element via it's ID
+        var mountainEl = document.querySelector('#mountain');
+        mountainEl.update();
+      }

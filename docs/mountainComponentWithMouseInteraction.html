@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Mountain Component with Collider-Check Component via Raycaster</title>
+    <title>Mountain Component with Mouse Interaction</title>
     <meta name="description" content="Mountain Component with collider check via Raycaster">
     <script src="build.js"></script>
     <link href="style.css" rel="stylesheet" media="all">
@@ -24,5 +24,13 @@
       <!--Light-->
       <a-entity light="type: ambient;"></a-entity>
     </a-scene>
+    <script>
+      function onDocumentMouseDown( event ) {
+        console.log("Mouse down");
+        //Gaining access to the landscape element via it's ID
+        var mountainEl = document.querySelector('#mountain');
+        mountainEl.update();
+      }
+    </script>
   </body>
 </html>
