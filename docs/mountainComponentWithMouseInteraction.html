@@ -25,12 +25,14 @@
       <a-entity light="type: ambient;"></a-entity>
     </a-scene>
     <script>
-      function onDocumentMouseDown( event ) {
+      document.addEventListener("click", function(){
+        //via http://www.w3schools.com/jsref/met_document_addeventlistener.asp
+        //and https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
         console.log("Mouse down");
         //Gaining access to the landscape element via it's ID
         var mountainEl = document.querySelector('#mountain');
         mountainEl.update();
-      }
+      });
     </script>
   </body>
 </html>
