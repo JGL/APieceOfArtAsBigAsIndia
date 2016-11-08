@@ -1,3 +1,16 @@
+html,
+body {
+  padding: 0;
+}
 body {
   background: white;
+}
+.bg-video {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1000;
 }

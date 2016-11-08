@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Mountain Component with Mouse Interaction</title>
+    <meta name="description" content="Mountain Component with collider check via Raycaster">
+    <script src="build.js"></script>
+    <link href="style.css" rel="stylesheet" media="all">
+  </head>
+  <body>
+    <video class="bg-video"></video>
+    <a-scene antialias="true">
+      <!--Camera-->
+      <a-entity position="0 0 0" rotation="0 0 0">
+        <a-entity camera look-controls wasd-controls></a-entity>
+      </a-entity>
+      <!--Mountain, seems to be on a large scale!-->
+      <a-mountain class="clickable" id="mountain" color="rgb(128,0,128)" shadowColor="rgb(255,165,0)" position="0 2000 0" material-side-modifier-mountain collider-check-and-update></a-mountain>
+      <!--Light-->
+      <a-entity light="type: ambient;"></a-entity>
+    </a-scene>
+    <script>
+      (function initCamera(config, callback) {
+        var config = {video: true, audio: false};
+        navigator.mediaDevices.getUserMedia(config).then(function(stream) {
+          var video = document.querySelector('.bg-video');
+          video.setAttribute('autoplay', true);
+          video.src = window.URL.createObjectURL(stream);
+          console.log('camera initialized');
+        }).catch(function(error) {
+          console.error('Error accessing camera', error)
+        });
+      })();
+    </script>
+  </body>
+</html>
