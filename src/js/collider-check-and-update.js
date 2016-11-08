@@ -1,6 +1,7 @@
 AFRAME.registerComponent('collider-check-and-update', {
   dependencies: ['raycaster'],
   init: function () {
+    var el = this.el;
     this.el.addEventListener('raycaster-intersected', function () {
       console.log('Player hit something!');
       console.log(this); //where am I?
@@ -8,7 +9,7 @@ AFRAME.registerComponent('collider-check-and-update', {
       //update(); //this errors with Uncaught ReferenceError: update is not defined
       //this.update(); //this doesn't error, but doesn't do anything
       //this.el.update(); //this errors with Cannot read property 'update' of undefined
-      this.el.components['mountain'].update(); //tip from Don McCurdy
+      el.components['mountain'].update(); //tip from Don McCurdy
     });
   }
 });
