@@ -2,8 +2,8 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Colliding with Mountain Component</title>
-    <meta name="description" content="Collding with Ocean Component">
+    <title>Colliding with Ocean Component</title>
+    <meta name="description" content="Colliding with Ocean Component">
     <script src="build.js"></script>
     <link href="style.css" rel="stylesheet" media="all">
   </head>
@@ -18,7 +18,7 @@
         </a-entity>
       </a-entity>
       <!--Ocean-->
-      <a-ocean id="ocean" position="0 10 0" width="50" depth="50" density="40" material-side-modifier-ocean cursor-listener></a-ocean>
+      <a-entity id="ocean" ocean="depth: 50; width: 50; density: 40" position="0 10 0" rotation="-90 0 0" material-side-modifier-ocean cursor-listener></a-entity>
       <!--Sky-->
       <a-sky src="#sky"></a-sky>
       <!--Light-->

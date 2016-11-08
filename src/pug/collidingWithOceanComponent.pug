@@ -2,8 +2,8 @@ doctype html
 html
   head
     meta(charset='utf-8')
-    title Colliding with Mountain Component
-    meta(name='description', content='Collding with Ocean Component')
+    title Colliding with Ocean Component
+    meta(name='description', content='Colliding with Ocean Component')
     script(src='build.js')
     link(href="style.css", rel="stylesheet", media="all")
   body
@@ -19,7 +19,7 @@ html
             geometry='primitive: ring'
             material='color: black; shader: flat')
       //Ocean
-      a-ocean(id='ocean' position='0 10 0' width='50' depth='50' density='40' material-side-modifier-ocean cursor-listener)
+      a-entity(id='ocean' ocean='depth: 50; width: 50; density: 40' position='0 10 0' rotation="-90 0 0" material-side-modifier-ocean cursor-listener)
       //Sky
       a-sky(src='#sky')
       //Light
