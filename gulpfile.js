@@ -7,7 +7,7 @@ var source = require('vinyl-source-stream');
 var browserify = require('browserify');
 
 // Tasks
-gulp.task('default', ['pug', 'less', 'browserify']);
+gulp.task('default', ['pug', 'less', 'browserify', 'browserifyRelease']);
 
 gulp.task('pug', function(){
 	return gulp.src( './src/pug/**/*.pug')
@@ -30,6 +30,15 @@ gulp.task('browserify', function() {
 	.pipe(gulp.dest('./docs/'));
 });
 
+gulp.task('browserifyRelease', function() {
+	return browserify('./src/js/mainForRelease.js')
+	.bundle()
+	//Pass desired output filename to vinyl-source-stream
+	.pipe(source('buildForRelease.js'))
+	// Start piping stream to tasks!
+	.pipe(gulp.dest('./docs/'));
+});
+
 // Watching
 gulp.task('watch', function(){
 	browserSync.init({
@@ -47,4 +56,7 @@ gulp.task('watch', function(){
 
 	gulp.watch('./src/js/**/*.js', [ 'browserify'])
 		.on('change', browserSync.reload);
+
+	gulp.watch('./src/js/**/*.js', [ 'browserifyRelease'])
+		.on('change', browserSync.reload);		
 });
