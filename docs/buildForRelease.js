@@ -67897,6 +67897,42 @@ module.exports = getWakeLock();
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],4:[function(require,module,exports){
+require('aframe');
+require('aframe-mountain-component');
+//second interaction demo, working with the Mountain component instead
+require('./material-side-modifier-mountain.js');
+//starting up touch and click events and random functions
+require('./touchEventsAndClickEventsAndRandomColours.js');
+},{"./material-side-modifier-mountain.js":5,"./touchEventsAndClickEventsAndRandomColours.js":6,"aframe":3,"aframe-mountain-component":1}],5:[function(require,module,exports){
+AFRAME.registerComponent('material-side-modifier-mountain', {
+  // This component can be used only once
+  //multiple: true,
+  // Allow material-side-modifier component a single property schema, of type int, defaulting to 2, aka THREE.DoubleSide, see https://threejs.org/docs/#Reference/Materials/Material.side
+  schema: {
+    side: {
+      type:'int',
+      default: 2
+    }
+  },
+  tick: function(){
+          //testing that I can print to the console
+        //console.log("A-Frame and the rest have loaded");
+        //Gaining access to the landscape element via it's ID
+        var mountainEl = document.querySelector('#mountain');
+        // Gaining access to the internal three.js object that the landscape component contains
+        var mountainObject3D = mountainEl.object3D;
+        //console.log(moutainObject3D.parent);
+        //console.log(moutainObject3D.children);
+        //See material properties here https://threejs.org/docs/#Reference/Materials/Material
+        mountainObject3D.traverse( function( node ) {
+          if( node.material ) { 
+            node.material.side = THREE.DoubleSide; //just the back in this case to avoid glitches...
+            node.material.needsUpdate = true;
+          }
+        });
+  }, 
+});
+},{}],6:[function(require,module,exports){
       function randomHsl() {
         //via http://stackoverflow.com/a/25873123/7116094 and http://caniuse.com/#feat=css3-colors so valid
         return 'hsla(' + (Math.random() * 360) + ', 100%, 50%, 1)';
@@ -67929,52 +67965,5 @@ module.exports = getWakeLock();
         //and https://developer.apple.com/library/content/documentation/AppleApplications/Reference/SafariWebContent/HandlingEvents/HandlingEvents.html#//apple_ref/doc/uid/TP40006511-SW6
         console.log("Touchend event");
         generateNewMountain();
-      });      
-      (function initCamera(config, callback) {
-        var config = {video: true, audio: false};
-        navigator.mediaDevices.getUserMedia(config).then(function(stream) {
-          var video = document.querySelector('.bg-video');
-          video.setAttribute('autoplay', true);
-          video.src = window.URL.createObjectURL(stream);
-          console.log('camera initialized');
-        }).catch(function(error) {
-          console.error('Error accessing camera', error)
-        });
-      })();
-},{}],5:[function(require,module,exports){
-require('aframe');
-require('aframe-mountain-component');
-//second interaction demo, working with the Mountain component instead
-require('./material-side-modifier-mountain.js');
-//starting up the events and the video background and the touch and click events
-require('./init.js');
-},{"./init.js":4,"./material-side-modifier-mountain.js":6,"aframe":3,"aframe-mountain-component":1}],6:[function(require,module,exports){
-AFRAME.registerComponent('material-side-modifier-mountain', {
-  // This component can be used only once
-  //multiple: true,
-  // Allow material-side-modifier component a single property schema, of type int, defaulting to 2, aka THREE.DoubleSide, see https://threejs.org/docs/#Reference/Materials/Material.side
-  schema: {
-    side: {
-      type:'int',
-      default: 2
-    }
-  },
-  tick: function(){
-          //testing that I can print to the console
-        //console.log("A-Frame and the rest have loaded");
-        //Gaining access to the landscape element via it's ID
-        var mountainEl = document.querySelector('#mountain');
-        // Gaining access to the internal three.js object that the landscape component contains
-        var mountainObject3D = mountainEl.object3D;
-        //console.log(moutainObject3D.parent);
-        //console.log(moutainObject3D.children);
-        //See material properties here https://threejs.org/docs/#Reference/Materials/Material
-        mountainObject3D.traverse( function( node ) {
-          if( node.material ) { 
-            node.material.side = THREE.DoubleSide; //just the back in this case to avoid glitches...
-            node.material.needsUpdate = true;
-          }
-        });
-  }, 
-});
-},{}]},{},[5]);
+      });
+},{}]},{},[4]);
