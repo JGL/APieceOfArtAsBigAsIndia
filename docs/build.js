@@ -4341,14 +4341,16 @@ AFRAME.registerComponent('mountain', {
   schema: {
     color: {default: 'rgb(92, 32, 0)'},
     shadowColor: {default: 'rgb(128, 96, 96)'},
-    sunPosition: {type: 'vec3', default: {x: 1, y: 1, z: 1}}
+    sunPosition: {type: 'vec3', default: {x: 1, y: 1, z: 1}},
+    worldDepth: {default: 256},
+    worldWidth: {default: 256}
   },
 
   update: function () {
     var data = this.data;
 
-    var worldDepth = 256;
-    var worldWidth = 256;
+    var worldDepth = data.worldDepth;
+    var worldWidth = data.worldWidth;
 
     // Generate heightmap.
     var terrainData = generateHeight(worldWidth, worldDepth);
@@ -4473,7 +4475,9 @@ AFRAME.registerPrimitive('a-mountain', {
   mappings: {
     color: 'mountain.color',
     'shadow-color': 'mountain.shadowColor',
-    'sun-position': 'mountain.sunPosition'
+    'sun-position': 'mountain.sunPosition',
+    'world-depth' :'mountain.worldDepth',
+    'world-width' :'mountain.worldWidth'
   }
 });
 
@@ -88498,7 +88502,6 @@ AFRAME.registerComponent('collider-check', {
 },{}],62:[function(require,module,exports){
 // Component to change to random colour on click, not functioning presently
 AFRAME.registerComponent('cursor-listener-terrain', {
-
   init: function () {
     this.el.addEventListener('click', function () {
     	console.log('I was clicked!');

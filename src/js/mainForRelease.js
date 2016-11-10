@@ -4,5 +4,3 @@ require('aframe-mountain-component');
 require('./material-side-modifier-mountain.js');
 //starting up touch and click events and random functions
 require('./touchEventsAndClickEventsAndRandomColours.js');
-//trying to make a faster mountain
-require('./aframe-mountain-component-faster.js');
