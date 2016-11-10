@@ -1,6 +1,5 @@
 // Component to change to random colour on click, not functioning presently
 AFRAME.registerComponent('cursor-listener-terrain', {
-
   init: function () {
     this.el.addEventListener('click', function () {
     	console.log('I was clicked!');
