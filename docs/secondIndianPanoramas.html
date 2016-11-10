@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Second Panoramas from India</title>
+    <meta name="description" content="Second group of 360 panoramas from Delhi">
+    <script src="build.js"></script>
+    <link href="style.css" rel="stylesheet" media="all">
+  </head>
+  <body>
+    <a-scene>
+      <!--Assets-->
+      <a-assets>
+        <audio id="click-sound" src="audio/click.ogg"></audio>
+        <img id="India1" src="img/secondPanoramas/indiaPan2_00001.JPG">
+        <img id="India1-thumb" src="img/secondPanoramas/indiaPan2_00001_thumb.JPG">
+        <img id="India2" src="img/secondPanoramas/indiaPan2_00002.JPG">
+        <img id="India2-thumb" src="img/secondPanoramas/indiaPan2_00002_thumb.JPG">
+        <img id="India3" src="img/secondPanoramas/indiaPan2_00003.JPG">
+        <img id="India3-thumb" src="img/secondPanoramas/indiaPan2_00003_thumb.JPG">
+        <img id="India4" src="img/secondPanoramas/indiaPan2_00004.JPG">
+        <img id="India4-thumb" src="img/secondPanoramas/indiaPan2_00004_thumb.JPG">
+        <img id="India5" src="img/secondPanoramas/indiaPan2_00005.JPG">
+        <img id="India5-thumb" src="img/secondPanoramas/indiaPan2_00005_thumb.JPG">
+        <img id="India6" src="img/secondPanoramas/indiaPan2_00006.JPG">
+        <img id="India6-thumb" src="img/secondPanoramas/indiaPan2_00006_thumb.JPG">
+        <img id="India7" src="img/secondPanoramas/indiaPan2_00007.JPG">
+        <img id="India7-thumb" src="img/secondPanoramas/indiaPan2_00007_thumb.JPG">
+        <img id="India8" src="img/secondPanoramas/indiaPan2_00008.JPG">
+        <img id="India8-thumb" src="img/secondPanoramas/indiaPan2_00008_thumb.JPG">
+        <img id="India9" src="img/secondPanoramas/indiaPan2_00009.JPG">
+        <img id="India9-thumb" src="img/secondPanoramas/indiaPan2_00009_thumb.JPG">
+        <img id="India10" src="img/secondPanoramas/indiaPan2_00010.JPG">
+        <img id="India10-thumb" src="img/secondPanoramas/indiaPan2_00010_thumb.JPG">
+        <img id="India11" src="img/secondPanoramas/indiaPan2_00011.JPG">
+        <img id="India11-thumb" src="img/secondPanoramas/indiaPan2_00011_thumb.JPG">
+        <img id="India12" src="img/secondPanoramas/indiaPan2_00012.JPG">
+        <img id="India12-thumb" src="img/secondPanoramas/indiaPan2_00012_thumb.JPG">
+        <img id="India13" src="img/secondPanoramas/indiaPan2_00013.JPG">
+        <img id="India13-thumb" src="img/secondPanoramas/indiaPan2_00013_thumb.JPG">
+        <img id="India14" src="img/secondPanoramas/indiaPan2_00014.JPG">
+        <img id="India14-thumb" src="img/secondPanoramas/indiaPan2_00014_thumb.JPG">
+        <img id="India15" src="img/secondPanoramas/indiaPan2_00015.JPG">
+        <img id="India15-thumb" src="img/secondPanoramas/indiaPan2_00015_thumb.JPG">
+        <img id="India16" src="img/secondPanoramas/indiaPan2_00016.JPG">
+        <img id="India16-thumb" src="img/secondPanoramas/indiaPan2_00016_thumb.JPG">
+        <img id="India17" src="img/secondPanoramas/indiaPan2_00017.JPG">
+        <img id="India17-thumb" src="img/secondPanoramas/indiaPan2_00017_thumb.JPG">
+        <img id="India18" src="img/secondPanoramas/indiaPan2_00018.JPG">
+        <img id="India18-thumb" src="img/secondPanoramas/indiaPan2_00018_thumb.JPG">
+        <img id="India19" src="img/secondPanoramas/indiaPan2_00019.JPG">
+        <img id="India19-thumb" src="img/secondPanoramas/indiaPan2_00019_thumb.JPG">
+        <img id="India20" src="img/secondPanoramas/indiaPan2_00020.JPG">
+        <img id="India20-thumb" src="img/secondPanoramas/indiaPan2_00020_thumb.JPG">
+        <img id="India21" src="img/secondPanoramas/indiaPan2_00021.JPG">
+        <img id="India21-thumb" src="img/secondPanoramas/indiaPan2_00021_thumb.JPG">
+        <img id="India22" src="img/secondPanoramas/indiaPan2_00022.JPG">
+        <img id="India22-thumb" src="img/secondPanoramas/indiaPan2_00022_thumb.JPG">
+        <img id="India23" src="img/secondPanoramas/indiaPan2_00023.JPG">
+        <img id="India23-thumb" src="img/secondPanoramas/indiaPan2_00023_thumb.JPG">
+        <img id="India24" src="img/secondPanoramas/indiaPan2_00024.JPG">
+        <img id="India24-thumb" src="img/secondPanoramas/indiaPan2_00024_thumb.JPG">
+        <img id="India25" src="img/secondPanoramas/indiaPan2_00025.JPG">
+        <img id="India25-thumb" src="img/secondPanoramas/indiaPan2_00025_thumb.JPG">
+        <!--Specify Nunjucks-->
+        <script id="link" type="text/nunjucks">
+          <a-plane class="link" height="1" width="1" material="shader:flat; src: {{ thumb }}" event-set__1="_event: mousedown; scale: 1 1 1" event-set__2="_event: mouseup; scale: 1.2 1.2 1" event-set__3="_event: mouseenter; scale: 1.2 1.2 1" event-set__4="_event: mouseleave; scale: 1 1 1" set-image="on: click; target: #panorama; src: {{ src }}" sound="on: click; src: #click-sound" update-raycaster="#cursor"></a-plane>
+        </script>
+      </a-assets>
+      <!--Panorama-->
+      <a-sky id="panorama" radius="20" src="#India1"></a-sky>
+      <!--Link-->
+      <a-entity id="links" layout="type: box; columns: 5; margin: 1.5" position="-2.25 -2.25 -5">
+        <!--Pass image sources to the template-->
+        <a-entity template="src: #link" data-src="#India1" data-thumb="#India1-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India2" data-thumb="#India2-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India3" data-thumb="#India3-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India4" data-thumb="#India4-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India5" data-thumb="#India5-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India6" data-thumb="#India6-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India7" data-thumb="#India7-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India8" data-thumb="#India8-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India9" data-thumb="#India9-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India10" data-thumb="#India10-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India11" data-thumb="#India11-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India12" data-thumb="#India12-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India13" data-thumb="#India13-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India14" data-thumb="#India14-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India15" data-thumb="#India15-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India16" data-thumb="#India16-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India17" data-thumb="#India17-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India18" data-thumb="#India18-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India19" data-thumb="#India19-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India20" data-thumb="#India20-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India21" data-thumb="#India21-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India22" data-thumb="#India22-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India23" data-thumb="#India23-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India24" data-thumb="#India24-thumb"></a-entity>
+        <a-entity template="src: #link" data-src="#India25" data-thumb="#India25-thumb"></a-entity>
+      </a-entity>
+      <!--Camera and Cursor-->
+      <a-entity camera look-controls>
+        <a-cursor id="cursor" animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150" animation__fusing="property: fusing; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500" event-set__1="_event: mouseenter; color: springgreen" event-set__2="_event: mouseleave; color: black" raycaster="objects: .link"></a-cursor>
+      </a-entity>
+    </a-scene>
+  </body>
+</html>
