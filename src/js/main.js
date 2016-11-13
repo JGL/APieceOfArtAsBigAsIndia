@@ -27,7 +27,6 @@ require('./material-side-modifier-ocean.js');
 require('./collider-check.js');
 //now trying to run the update() method of an attached component using the collider to attach
 require('./collider-check-and-update.js');
-
 //var clickdrag = require('aframe-click-drag-component');
-var clickdrag = require('clickdrag.js');
+var clickdrag = require('./clickdrag.js');
 clickdrag.default(AFRAME);

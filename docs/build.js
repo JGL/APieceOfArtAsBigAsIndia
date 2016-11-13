@@ -191,720 +191,9 @@ function getPropertyType (el, property) {
   return component.schema.type;
 }
 
-},{"animejs":51}],2:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-exports.default = aframeDraggableComponent;
-
-var _deepEqual = require('deep-equal');
-
-var _deepEqual2 = _interopRequireDefault(_deepEqual);
-
-var _linear_regression = require('simple-statistics/src/linear_regression');
-
-var _linear_regression2 = _interopRequireDefault(_linear_regression);
-
-var _linear_regression_line = require('simple-statistics/src/linear_regression_line');
-
-var _linear_regression_line2 = _interopRequireDefault(_linear_regression_line);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var COMPONENT_NAME = 'click-drag';
-var DRAG_START_EVENT = 'dragstart';
-var DRAG_MOVE_EVENT = 'dragmove';
-var DRAG_END_EVENT = 'dragend';
-
-var TIME_TO_KEEP_LOG = 300;
-
-function forceWorldUpdate(threeElement) {
-
-  var element = threeElement;
-  while (element.parent) {
-    element = element.parent;
-  }
-
-  element.updateMatrixWorld(true);
-}
-
-function forEachParent(element, lambda) {
-  while (element.attachedToParent) {
-    element = element.parentElement;
-    lambda(element);
-  }
-}
-
-function someParent(element, lambda) {
-  while (element.attachedToParent) {
-    element = element.parentElement;
-    if (lambda(element)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function cameraPositionToVec3(camera, vec3) {
-
-  vec3.set(camera.components.position.data.x, camera.components.position.data.y, camera.components.position.data.z);
-
-  forEachParent(camera, function (element) {
-
-    if (element.components && element.components.position) {
-      vec3.set(vec3.x + element.components.position.data.x, vec3.y + element.components.position.data.y, vec3.z + element.components.position.data.z);
-    }
-  });
-}
-
-function localToWorld(THREE, threeCamera, vector) {
-  forceWorldUpdate(threeCamera);
-  return threeCamera.localToWorld(vector);
-}
-
-var _ref = function unprojectFunction() {
-
-  var initialized = false;
-
-  var matrix = void 0;
-
-  function initialize(THREE) {
-    matrix = new THREE.Matrix4();
-
-    return true;
-  }
-
-  return {
-    unproject: function unproject(THREE, vector, camera) {
-
-      var threeCamera = camera.components.camera.camera;
-
-      initialized = initialized || initialize(THREE);
-
-      vector.applyProjection(matrix.getInverse(threeCamera.projectionMatrix));
-
-      return localToWorld(THREE, threeCamera, vector);
-    }
-  };
-}(),
-    unproject = _ref.unproject;
-
-function clientCoordsTo3DCanvasCoords(clientX, clientY, offsetX, offsetY, clientWidth, clientHeight) {
-  return {
-    x: (clientX - offsetX) / clientWidth * 2 - 1,
-    y: -((clientY - offsetY) / clientHeight) * 2 + 1
-  };
-}
-
-var _ref2 = function screenCoordsToDirectionFunction() {
-
-  var initialized = false;
-
-  var mousePosAsVec3 = void 0;
-  var cameraPosAsVec3 = void 0;
-
-  function initialize(THREE) {
-    mousePosAsVec3 = new THREE.Vector3();
-    cameraPosAsVec3 = new THREE.Vector3();
-
-    return true;
-  }
-
-  return {
-    screenCoordsToDirection: function screenCoordsToDirection(THREE, aframeCamera, _ref3) {
-      var clientX = _ref3.x,
-          clientY = _ref3.y;
-
-
-      initialized = initialized || initialize(THREE);
-
-      // scale mouse coordinates down to -1 <-> +1
-
-      var _clientCoordsTo3DCanv = clientCoordsTo3DCanvasCoords(clientX, clientY, 0, 0, // TODO: Replace with canvas position
-      window.innerWidth, window.innerHeight),
-          mouseX = _clientCoordsTo3DCanv.x,
-          mouseY = _clientCoordsTo3DCanv.y;
-
-      mousePosAsVec3.set(mouseX, mouseY, -1);
-
-      // apply camera transformation from near-plane of mouse x/y into 3d space
-      // NOTE: This should be replaced with THREE code directly once the aframe bug
-      // is fixed:
-      /*
-            cameraPositionToVec3(aframeCamera, cameraPosAsVec3);
-            const {x, y, z} = new THREE
-             .Vector3(mouseX, mouseY, -1)
-             .unproject(aframeCamera.components.camera.camera)
-             .sub(cameraPosAsVec3)
-             .normalize();
-      */
-      var projectedVector = unproject(THREE, mousePosAsVec3, aframeCamera);
-
-      cameraPositionToVec3(aframeCamera, cameraPosAsVec3);
-
-      // Get the unit length direction vector from the camera's position
-
-      var _projectedVector$sub$ = projectedVector.sub(cameraPosAsVec3).normalize(),
-          x = _projectedVector$sub$.x,
-          y = _projectedVector$sub$.y,
-          z = _projectedVector$sub$.z;
-
-      return { x: x, y: y, z: z };
-    }
-  };
-}(),
-    screenCoordsToDirection = _ref2.screenCoordsToDirection;
-
-/**
- * @param planeNormal {THREE.Vector3}
- * @param planeConstant {Float} Distance from origin of the plane
- * @param rayDirection {THREE.Vector3} Direction of ray from the origin
- *
- * @return {THREE.Vector3} The intersection point of the ray and plane
- */
-
-
-function rayPlaneIntersection(planeNormal, planeConstant, rayDirection) {
-  // A line from the camera position toward (and through) the plane
-  var distanceToPlane = planeConstant / planeNormal.dot(rayDirection);
-  return rayDirection.multiplyScalar(distanceToPlane);
-}
-
-var _ref4 = function directionToWorldCoordsFunction() {
-
-  var initialized = false;
-
-  var direction = void 0;
-  var cameraPosAsVec3 = void 0;
-
-  function initialize(THREE) {
-    direction = new THREE.Vector3();
-    cameraPosAsVec3 = new THREE.Vector3();
-
-    return true;
-  }
-
-  return {
-    /**
-     * @param camera Three.js Camera instance
-     * @param Object Position of the camera
-     * @param Object position of the mouse (scaled to be between -1 to 1)
-     * @param depth Depth into the screen to calculate world coordinates for
-     */
-    directionToWorldCoords: function directionToWorldCoords(THREE, aframeCamera, camera, _ref5, depth) {
-      var directionX = _ref5.x,
-          directionY = _ref5.y,
-          directionZ = _ref5.z;
-
-
-      initialized = initialized || initialize(THREE);
-
-      cameraPositionToVec3(aframeCamera, cameraPosAsVec3);
-      direction.set(directionX, directionY, directionZ);
-
-      // A line from the camera position toward (and through) the plane
-      var newPosition = rayPlaneIntersection(camera.getWorldDirection(), depth, direction);
-
-      // Reposition back to the camera position
-
-      var _newPosition$add = newPosition.add(cameraPosAsVec3),
-          x = _newPosition$add.x,
-          y = _newPosition$add.y,
-          z = _newPosition$add.z;
-
-      return { x: x, y: y, z: z };
-    }
-  };
-}(),
-    directionToWorldCoords = _ref4.directionToWorldCoords;
-
-var _ref6 = function selectItemFunction() {
-
-  var initialized = false;
-
-  var cameraPosAsVec3 = void 0;
-  var directionAsVec3 = void 0;
-  var raycaster = void 0;
-  var plane = void 0;
-
-  function initialize(THREE) {
-    plane = new THREE.Plane();
-    cameraPosAsVec3 = new THREE.Vector3();
-    directionAsVec3 = new THREE.Vector3();
-    raycaster = new THREE.Raycaster();
-
-    // TODO: From camera values?
-    raycaster.far = Infinity;
-    raycaster.near = 0;
-
-    return true;
-  }
-
-  return {
-    selectItem: function selectItem(THREE, selector, camera, clientX, clientY) {
-
-      initialized = initialized || initialize(THREE);
-
-      var _screenCoordsToDirect = screenCoordsToDirection(THREE, camera, { x: clientX, y: clientY }),
-          directionX = _screenCoordsToDirect.x,
-          directionY = _screenCoordsToDirect.y,
-          directionZ = _screenCoordsToDirect.z;
-
-      cameraPositionToVec3(camera, cameraPosAsVec3);
-      directionAsVec3.set(directionX, directionY, directionZ);
-
-      raycaster.set(cameraPosAsVec3, directionAsVec3);
-
-      // Push meshes onto list of objects to intersect.
-      // TODO: Can we do this at some other point instead of every time a ray is
-      // cast? Is that a micro optimization?
-      var objects = Array.from(camera.sceneEl.querySelectorAll('[' + selector + ']')).map(function (object) {
-        return object.object3D;
-      });
-
-      var recursive = true;
-
-      var intersected = raycaster.intersectObjects(objects, recursive)
-      // Only keep intersections against objects that have a reference to an entity.
-      .filter(function (intersection) {
-        return !!intersection.object.el;
-      })
-      // Only keep ones that are visible
-      .filter(function (intersection) {
-        return intersection.object.parent.visible;
-      })
-      // The first element is the closest
-      [0]; // eslint-disable-line no-unexpected-multiline
-
-      if (!intersected) {
-        return {};
-      }
-
-      var point = intersected.point,
-          object = intersected.object;
-
-      // Aligned to the world direction of the camera
-      // At the specified intersection point
-
-      plane.setFromNormalAndCoplanarPoint(camera.components.camera.camera.getWorldDirection().clone().negate(), point.clone().sub(cameraPosAsVec3));
-
-      var depth = plane.constant;
-
-      var offset = point.sub(object.getWorldPosition());
-
-      return { depth: depth, offset: offset, element: object.el };
-    }
-  };
-}(),
-    selectItem = _ref6.selectItem;
-
-function dragItem(THREE, element, offset, camera, depth, mouseInfo) {
-
-  var threeCamera = camera.components.camera.camera;
-
-  // Setting up for rotation calculations
-  var startCameraRotationInverse = threeCamera.getWorldQuaternion().inverse();
-  var startElementRotation = element.object3D.getWorldQuaternion();
-  var elementRotationOrder = element.object3D.rotation.order;
-
-  var rotationQuaternion = new THREE.Quaternion();
-  var rotationEuler = element.object3D.rotation.clone();
-
-  var offsetVector = new THREE.Vector3(offset.x, offset.y, offset.z);
-  var lastMouseInfo = mouseInfo;
-
-  var nextRotation = {
-    x: THREE.Math.radToDeg(rotationEuler.x),
-    y: THREE.Math.radToDeg(rotationEuler.y),
-    z: THREE.Math.radToDeg(rotationEuler.z)
-  };
-
-  var activeCamera = element.sceneEl.systems.camera.activeCameraEl;
-
-  var isChildOfActiveCamera = someParent(element, function (parent) {
-    return parent === activeCamera;
-  });
-
-  function onMouseMove(_ref7) {
-    var clientX = _ref7.clientX,
-        clientY = _ref7.clientY;
-
-
-    lastMouseInfo = { clientX: clientX, clientY: clientY };
-
-    var direction = screenCoordsToDirection(THREE, camera, { x: clientX, y: clientY });
-
-    var _directionToWorldCoor = directionToWorldCoords(THREE, camera, camera.components.camera.camera, direction, depth),
-        x = _directionToWorldCoor.x,
-        y = _directionToWorldCoor.y,
-        z = _directionToWorldCoor.z;
-
-    var rotationDiff = void 0;
-
-    // Start by rotating backwards from the initial camera rotation
-    rotationDiff = rotationQuaternion.copy(startCameraRotationInverse);
-
-    // rotate the offset
-    offsetVector.set(offset.x, offset.y, offset.z);
-
-    // Then add the current camera rotation
-    rotationDiff = rotationQuaternion.multiply(threeCamera.getWorldQuaternion());
-
-    offsetVector.applyQuaternion(rotationDiff);
-
-    if (!isChildOfActiveCamera) {
-      // And correctly offset rotation
-      rotationDiff.multiply(startElementRotation);
-
-      rotationEuler.setFromQuaternion(rotationDiff, elementRotationOrder);
-    }
-
-    nextRotation.x = THREE.Math.radToDeg(rotationEuler.x);
-    nextRotation.y = THREE.Math.radToDeg(rotationEuler.y);
-    nextRotation.z = THREE.Math.radToDeg(rotationEuler.z);
-
-    var nextPosition = { x: x - offsetVector.x, y: y - offsetVector.y, z: z - offsetVector.z };
-
-    // When the element has parents, we need to convert its new world position
-    // into new local position of its parent element
-    if (element.parentEl !== element.sceneEl) {
-
-      // The new world position
-      offsetVector.set(nextPosition.x, nextPosition.y, nextPosition.z);
-
-      // Converted
-      element.parentEl.object3D.worldToLocal(offsetVector);
-
-      nextPosition.x = offsetVector.x;
-      nextPosition.y = offsetVector.y;
-      nextPosition.z = offsetVector.z;
-    }
-
-    element.emit(DRAG_MOVE_EVENT, { nextPosition: nextPosition, nextRotation: nextRotation, clientX: clientX, clientY: clientY });
-
-    element.setAttribute('position', nextPosition);
-
-    element.setAttribute('rotation', nextRotation);
-  }
-
-  function onTouchMove(_ref8) {
-    var _ref8$changedTouches = _slicedToArray(_ref8.changedTouches, 1),
-        touchInfo = _ref8$changedTouches[0];
-
-    onMouseMove(touchInfo);
-  }
-
-  function onCameraChange(_ref9) {
-    var detail = _ref9.detail;
-
-    if ((detail.name === 'position' || detail.name === 'rotation') && !(0, _deepEqual2.default)(detail.oldData, detail.newData)) {
-      onMouseMove(lastMouseInfo);
-    }
-  }
-
-  document.addEventListener('mousemove', onMouseMove);
-  document.addEventListener('touchmove', onTouchMove);
-  camera.addEventListener('componentchanged', onCameraChange);
-
-  // The "unlisten" function
-  return function (_) {
-    document.removeEventListener('mousemove', onMouseMove);
-    document.removeEventListener('touchmove', onTouchMove);
-    camera.removeEventListener('componentchanged', onCameraChange);
-  };
-}
-
-// Closure to close over the removal of the event listeners
-
-var _ref10 = function getDidMountAndUnmount() {
-
-  var removeClickListeners = void 0;
-  var removeDragListeners = void 0;
-  var cache = [];
-
-  function initialize(THREE, componentName) {
-
-    // TODO: Based on a scene from the element passed in?
-    var scene = document.querySelector('a-scene');
-    // delay loading of this as we're not 100% if the scene has loaded yet or not
-    var camera = void 0;
-    var draggedElement = void 0;
-    var dragInfo = void 0;
-    var positionLog = [];
-
-    function cleanUpPositionLog() {
-      var now = performance.now();
-      while (positionLog.length && now - positionLog[0].time > TIME_TO_KEEP_LOG) {
-        // remove the first element;
-        positionLog.shift();
-      }
-    }
-
-    function onDragged(_ref11) {
-      var nextPosition = _ref11.detail.nextPosition;
-
-      // Continuously clean up so we don't get huge logs built up
-      cleanUpPositionLog();
-      positionLog.push({
-        position: Object.assign({}, nextPosition),
-        time: performance.now()
-      });
-    }
-
-    function onMouseDown(_ref12) {
-      var clientX = _ref12.clientX,
-          clientY = _ref12.clientY;
-
-      var _selectItem = selectItem(THREE, componentName, camera, clientX, clientY),
-          depth = _selectItem.depth,
-          offset = _selectItem.offset,
-          element = _selectItem.element;
-
-      if (element) {
-        (function () {
-          // Can only drag one item at a time, so no need to check if any
-          // listener is already set up
-          var removeDragItemListeners = dragItem(THREE, element, offset, camera, depth, {
-            clientX: clientX,
-            clientY: clientY
-          });
-
-          draggedElement = element;
-
-          dragInfo = {
-            offset: { x: offset.x, y: offset.y, z: offset.z },
-            depth: depth,
-            clientX: clientX,
-            clientY: clientY
-          };
-
-          element.addEventListener(DRAG_MOVE_EVENT, onDragged);
-
-          removeDragListeners = function removeDragListeners(_) {
-            element.removeEventListener(DRAG_MOVE_EVENT, onDragged);
-            // eslint-disable-next-line no-unused-expressions
-            removeDragItemListeners && removeDragItemListeners();
-            // in case this removal function gets called more than once
-            removeDragItemListeners = null;
-          };
-
-          element.emit(DRAG_START_EVENT, dragInfo);
-        })();
-      }
-    }
-
-    function fitLineToVelocity(dimension) {
-
-      if (positionLog.length < 2) {
-        return 0;
-      }
-
-      var velocities = positionLog
-
-      // Pull out just the x, y, or z values
-      .map(function (log) {
-        return { time: log.time, value: log.position[dimension] };
-      })
-
-      // Then convert that into an array of array pairs [time, value]
-      .reduce(function (memo, log, index, collection) {
-
-        // skip the first item (we're looking for pairs)
-        if (index === 0) {
-          return memo;
-        }
-
-        var deltaPosition = log.value - collection[index - 1].value;
-        var deltaTime = (log.time - collection[index - 1].time) / 1000;
-
-        // The new value is the change in position
-        memo.push([log.time, deltaPosition / deltaTime]);
-
-        return memo;
-      }, []);
-
-      // Calculate the line function
-      var lineFunction = (0, _linear_regression_line2.default)((0, _linear_regression2.default)(velocities));
-
-      // Calculate what the point was at the end of the line
-      // ie; the velocity at the time the drag stopped
-      return lineFunction(positionLog[positionLog.length - 1].time);
-    }
-
-    function onMouseUp(_ref13) {
-      var clientX = _ref13.clientX,
-          clientY = _ref13.clientY;
-
-
-      if (!draggedElement) {
-        return;
-      }
-
-      cleanUpPositionLog();
-
-      var velocity = {
-        x: fitLineToVelocity('x'),
-        y: fitLineToVelocity('y'),
-        z: fitLineToVelocity('z')
-      };
-
-      draggedElement.emit(DRAG_END_EVENT, Object.assign({}, dragInfo, { clientX: clientX, clientY: clientY, velocity: velocity }));
-
-      removeDragListeners && removeDragListeners(); // eslint-disable-line no-unused-expressions
-      removeDragListeners = undefined;
-    }
-
-    function onTouchStart(_ref14) {
-      var _ref14$changedTouches = _slicedToArray(_ref14.changedTouches, 1),
-          touchInfo = _ref14$changedTouches[0];
-
-      onMouseDown(touchInfo);
-    }
-
-    function onTouchEnd(_ref15) {
-      var _ref15$changedTouches = _slicedToArray(_ref15.changedTouches, 1),
-          touchInfo = _ref15$changedTouches[0];
-
-      onMouseUp(touchInfo);
-    }
-
-    function run() {
-
-      camera = scene.camera.el;
-
-      // TODO: Attach to canvas?
-      document.addEventListener('mousedown', onMouseDown);
-      document.addEventListener('mouseup', onMouseUp);
-
-      document.addEventListener('touchstart', onTouchStart);
-      document.addEventListener('touchend', onTouchEnd);
-
-      removeClickListeners = function removeClickListeners(_) {
-        document.removeEventListener('mousedown', onMouseDown);
-        document.removeEventListener('mouseup', onMouseUp);
-
-        document.removeEventListener('touchstart', onTouchStart);
-        document.removeEventListener('touchend', onTouchEnd);
-      };
-    }
-
-    if (scene.hasLoaded) {
-      run();
-    } else {
-      scene.addEventListener('loaded', run);
-    }
-  }
-
-  function tearDown() {
-    removeClickListeners && removeClickListeners(); // eslint-disable-line no-unused-expressions
-    removeClickListeners = undefined;
-  }
-
-  return {
-    didMount: function didMount(element, THREE, componentName) {
-
-      if (cache.length === 0) {
-        initialize(THREE, componentName);
-      }
-
-      if (cache.indexOf(element) === -1) {
-        cache.push(element);
-      }
-    },
-    didUnmount: function didUnmount(element) {
-
-      var cacheIndex = cache.indexOf(element);
-
-      removeDragListeners && removeDragListeners(); // eslint-disable-line no-unused-expressions
-      removeDragListeners = undefined;
-
-      if (cacheIndex === -1) {
-        return;
-      }
-
-      // remove that element
-      cache.splice(cacheIndex, 1);
-
-      if (cache.length === 0) {
-        tearDown();
-      }
-    }
-  };
-}(),
-    didMount = _ref10.didMount,
-    didUnmount = _ref10.didUnmount;
-
-/**
- * @param aframe {Object} The Aframe instance to register with
- * @param componentName {String} The component name to use. Default: 'click-drag'
- */
-
-
-function aframeDraggableComponent(aframe) {
-  var componentName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : COMPONENT_NAME;
-
-
-  var THREE = aframe.THREE;
-
-  /**
-   * Draggable component for A-Frame.
-   */
-  aframe.registerComponent(componentName, {
-    schema: {},
-
-    /**
-     * Called once when component is attached. Generally for initial setup.
-     */
-    init: function init() {
-      didMount(this, THREE, componentName);
-    },
-
-
-    /**
-     * Called when component is attached and when component data changes.
-     * Generally modifies the entity based on the data.
-     *
-     * @param oldData
-     */
-    update: function update() {},
-
-
-    /**
-     * Called when a component is removed (e.g., via removeAttribute).
-     * Generally undoes all modifications to the entity.
-     */
-    remove: function remove() {
-      didUnmount(this);
-    },
-
-
-    /**
-     * Called when entity pauses.
-     * Use to stop or remove any dynamic or background behavior such as events.
-     */
-    pause: function pause() {
-      didUnmount(this);
-    },
-
-
-    /**
-     * Called when entity resumes.
-     * Use to continue or add any dynamic or background behavior such as events.
-     */
-    play: function play() {
-      didMount(this, THREE, componentName);
-    }
-  });
-}
-
-},{"deep-equal":53,"simple-statistics/src/linear_regression":56,"simple-statistics/src/linear_regression_line":57}],3:[function(require,module,exports){
+},{"animejs":50}],2:[function(require,module,exports){
 !function(e){function t(r){if(n[r])return n[r].exports;var i=n[r]={exports:{},id:r,loaded:!1};return e[r].call(i.exports,i,i.exports,t),i.loaded=!0,i.exports}var n={};return t.m=e,t.c=n,t.p="",t(0)}([function(e,t){var n=AFRAME.utils.styleParser;if("undefined"==typeof AFRAME)throw new Error("Component attempted to register before AFRAME was available.");AFRAME.registerComponent("event-set",{schema:{"default":"",parse:function(e){var t=n.parse(e),r={};return Object.keys(t).forEach(function(e){var n=e.replace(/([a-z])([A-Z])/g,"$1-$2").toLowerCase();r[n]=t[e]}),r}},multiple:!0,init:function(){this.eventHandler=null,this.eventName=null},update:function(e){this.removeEventListener(),this.updateEventListener(),this.addEventListener()},remove:function(){this.removeEventListener()},pause:function(){this.removeEventListener()},play:function(){this.addEventListener()},updateEventListener:function(){var e=this.data,t=this.el,n=e._event,r=e._target;delete e._event,delete e._target;var i=r?t.sceneEl.querySelector(r):t;this.eventName=n,this.eventHandler=function(){Object.keys(e).forEach(function(t){AFRAME.utils.entity.setComponentProperty.call(this,i,t,e[t])})}},addEventListener:function(){this.el.addEventListener(this.eventName,this.eventHandler)},removeEventListener:function(){this.el.removeEventListener(this.eventName,this.eventHandler)}})}]);
-},{}],4:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 module.exports = {
   controls:   require('./src/controls'),
   loaders:    require('./src/loaders'),
@@ -923,7 +212,7 @@ module.exports = {
   }
 };
 
-},{"./src/controls":12,"./src/loaders":17,"./src/misc":22,"./src/primitives":30,"./src/shadows":31,"aframe-physics-system":37}],5:[function(require,module,exports){
+},{"./src/controls":11,"./src/loaders":16,"./src/misc":21,"./src/primitives":29,"./src/shadows":30,"aframe-physics-system":36}],4:[function(require,module,exports){
 module.exports = Object.assign(function GamepadButton () {}, {
 	FACE_1: 0,
 	FACE_2: 1,
@@ -946,7 +235,7 @@ module.exports = Object.assign(function GamepadButton () {}, {
 	VENDOR: 16,
 });
 
-},{}],6:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 function GamepadButtonEvent (type, index, details) {
   this.type = type;
   this.index = index;
@@ -956,7 +245,7 @@ function GamepadButtonEvent (type, index, details) {
 
 module.exports = GamepadButtonEvent;
 
-},{}],7:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 /**
  * @author Wei Meng / http://about.me/menway
  *
@@ -1436,7 +725,7 @@ THREE.PLYLoader.prototype = {
 
 };
 
-},{}],8:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /**
  * Polyfill for the additional KeyboardEvent properties defined in the D3E and
  * D4E draft specifications, by @inexorabletash.
@@ -2169,7 +1458,7 @@ THREE.PLYLoader.prototype = {
 
 } (window));
 
-},{}],9:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var EPS = 0.1;
 
 module.exports = {
@@ -2235,7 +1524,7 @@ module.exports = {
   }
 };
 
-},{}],10:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /**
  * Gamepad controls for A-Frame.
  *
@@ -2491,7 +1780,7 @@ module.exports = {
   }
 };
 
-},{"../../lib/GamepadButton":5,"../../lib/GamepadButtonEvent":6}],11:[function(require,module,exports){
+},{"../../lib/GamepadButton":4,"../../lib/GamepadButtonEvent":5}],10:[function(require,module,exports){
 var radToDeg = THREE.Math.radToDeg,
     isMobile = AFRAME.utils.isMobile();
 
@@ -2574,7 +1863,7 @@ function isNullVector (vector) {
   return vector.x === 0 && vector.y === 0 && vector.z === 0;
 }
 
-},{}],12:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var physics = require('aframe-physics-system');
 
 module.exports = {
@@ -2604,7 +1893,7 @@ module.exports = {
   }
 };
 
-},{"./checkpoint-controls":9,"./gamepad-controls":10,"./hmd-controls":11,"./keyboard-controls":13,"./mouse-controls":14,"./touch-controls":15,"./universal-controls":16,"aframe-physics-system":37}],13:[function(require,module,exports){
+},{"./checkpoint-controls":8,"./gamepad-controls":9,"./hmd-controls":10,"./keyboard-controls":12,"./mouse-controls":13,"./touch-controls":14,"./universal-controls":15,"aframe-physics-system":36}],12:[function(require,module,exports){
 require('../../lib/keyboard.polyfill');
 
 var MAX_DELTA = 0.2,
@@ -2755,7 +2044,7 @@ module.exports = {
 
 };
 
-},{"../../lib/keyboard.polyfill":8}],14:[function(require,module,exports){
+},{"../../lib/keyboard.polyfill":7}],13:[function(require,module,exports){
 /**
  * Mouse + Pointerlock controls.
  *
@@ -2895,7 +2184,7 @@ module.exports = {
   }
 };
 
-},{}],15:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 module.exports = {
   schema: {
     enabled: { default: true }
@@ -2965,7 +2254,7 @@ module.exports = {
   }
 };
 
-},{}],16:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 /**
  * Universal Controls
  *
@@ -3163,7 +2452,7 @@ module.exports = {
   }
 };
 
-},{}],17:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 module.exports = {
   'ply-model': require('./ply-model'),
   'three-model': require('./three-model'),
@@ -3187,7 +2476,7 @@ module.exports = {
   }
 };
 
-},{"./ply-model":18,"./three-model":19}],18:[function(require,module,exports){
+},{"./ply-model":17,"./three-model":18}],17:[function(require,module,exports){
 /**
  * ply-model
  *
@@ -3268,7 +2557,7 @@ function createModel (geometry) {
   }));
 }
 
-},{"../../lib/PLYLoader":7}],19:[function(require,module,exports){
+},{"../../lib/PLYLoader":6}],18:[function(require,module,exports){
 var DEFAULT_ANIMATION = '__auto__';
 
 /**
@@ -3409,7 +2698,7 @@ module.exports = {
   }
 };
 
-},{}],20:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 module.exports = {
   schema: {
     defaultRotation: {type: 'vec3'},
@@ -3435,7 +2724,7 @@ module.exports = {
   }
 };
 
-},{}],21:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 /**
  * Based on aframe/examples/showcase/tracked-controls.
  *
@@ -3507,7 +2796,7 @@ module.exports = {
   }
 };
 
-},{}],22:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var physics = require('aframe-physics-system');
 
 module.exports = {
@@ -3535,7 +2824,7 @@ module.exports = {
   }
 };
 
-},{"./checkpoint":20,"./grab":21,"./jump-ability":23,"./kinematic-body":24,"./sphere-collider":25,"./toggle-velocity":26,"aframe-physics-system":37}],23:[function(require,module,exports){
+},{"./checkpoint":19,"./grab":20,"./jump-ability":22,"./kinematic-body":23,"./sphere-collider":24,"./toggle-velocity":25,"aframe-physics-system":36}],22:[function(require,module,exports){
 var ACCEL_G = -9.8, // m/s^2
     EASING = -15; // m/s^2
 
@@ -3599,7 +2888,7 @@ module.exports = {
   }
 };
 
-},{}],24:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 /**
  * Kinematic body.
  *
@@ -3798,7 +3087,7 @@ module.exports = {
   }
 };
 
-},{"cannon":52}],25:[function(require,module,exports){
+},{"cannon":51}],24:[function(require,module,exports){
 /**
  * Based on aframe/examples/showcase/tracked-controls.
  *
@@ -3891,7 +3180,7 @@ module.exports = {
   })()
 };
 
-},{}],26:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 /**
  * Toggle velocity.
  *
@@ -3928,7 +3217,7 @@ module.exports = {
   },
 };
 
-},{}],27:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 /**
  * Flat grid.
  *
@@ -3954,7 +3243,7 @@ module.exports = {
   }
 };
 
-},{}],28:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 /**
  * Flat-shaded ocean primitive.
  *
@@ -4050,7 +3339,7 @@ module.exports.Component = {
   }
 };
 
-},{}],29:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 /**
  * Tube following a custom path.
  *
@@ -4114,7 +3403,7 @@ module.exports.Component = {
   }
 };
 
-},{}],30:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 module.exports = {
   'a-grid':        require('./a-grid'),
   'a-ocean':        require('./a-ocean'),
@@ -4137,7 +3426,7 @@ module.exports = {
   }
 };
 
-},{"./a-grid":27,"./a-ocean":28,"./a-tube":29}],31:[function(require,module,exports){
+},{"./a-grid":26,"./a-ocean":27,"./a-tube":28}],30:[function(require,module,exports){
 module.exports = {
   'shadow':       require('./shadow'),
   'shadow-light': require('./shadow-light'),
@@ -4154,7 +3443,7 @@ module.exports = {
   }
 };
 
-},{"./shadow":33,"./shadow-light":32}],32:[function(require,module,exports){
+},{"./shadow":32,"./shadow-light":31}],31:[function(require,module,exports){
 /**
  * Light component.
  *
@@ -4294,7 +3583,7 @@ module.exports = {
   }
 };
 
-},{}],33:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 /**
  * Shadow component.
  *
@@ -4329,9 +3618,9 @@ module.exports = {
   remove: function () {}
 };
 
-},{}],34:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 !function(t){function e(n){if(i[n])return i[n].exports;var r=i[n]={exports:{},id:n,loaded:!1};return t[n].call(r.exports,r,r.exports,e),r.loaded=!0,r.exports}var i={};return e.m=t,e.c=i,e.p="",e(0)}([function(t,e){function i(t,e,i){for(var n=[],r=Math.ceil(e/t.columns),o=0;r>o;o++)for(var a=0;a<t.columns;a++)n.push([a*t.margin,o*t.margin,0]);return n}function n(t,e,i){for(var n=[],r=0;e>r;r++){var o=r*(2*Math.PI)/e;n.push([i.x+t.radius*Math.cos(o),i.y,i.z+t.radius*Math.sin(o)])}return n}function r(t,e,n){return t.columns=e,i(t,e,n)}function o(t,e,i){return u([[1,0,0],[0,1,0],[0,0,1],[-1,0,0],[0,-1,0],[0,0,-1]],i,t.radius/2)}function a(t,e,i){var n=(1+Math.sqrt(5))/2,r=1/n,o=2-n,a=-1*r,s=-1*o;return u([[-1,o,0],[-1,s,0],[0,-1,o],[0,-1,s],[0,1,o],[0,1,s],[1,o,0],[1,s,0],[r,r,r],[r,r,a],[r,a,r],[r,a,a],[o,0,1],[o,0,-1],[a,r,r],[a,r,a],[a,a,r],[a,a,a],[s,0,1],[s,0,-1]],i,t.radius/2)}function s(t,e,i){var n=Math.sqrt(3),r=-1/Math.sqrt(3),o=2*Math.sqrt(2/3);return u([[0,0,n+r],[-1,0,r],[1,0,r],[0,o,0]],i,t.radius/2)}function u(t,e,i){return e=[e.x,e.y,e.z],t.map(function(t){return t.map(function(t,n){return t*i+e[n]})})}function c(t,e){t.forEach(function(t,i){var n=e[i];t.setAttribute("position",{x:n[0],y:n[1],z:n[2]})})}AFRAME.registerComponent("layout",{schema:{columns:{"default":1,min:0,"if":{type:["box"]}},margin:{"default":1,min:0,"if":{type:["box","line"]}},radius:{"default":1,min:0,"if":{type:["circle","cube","dodecahedron","pyramid"]}},type:{"default":"line",oneOf:["box","circle","cube","dodecahedron","line","pyramid"]}},init:function(){var t=this,e=this.el;this.children=e.getChildEntities(),this.initialPositions=[],this.children.forEach(function(e){function i(){var i=e.getComputedAttribute("position");t.initialPositions.push([i.x,i.y,i.z])}return e.hasLoaded?i():void e.addEventListener("loaded",i)}),e.addEventListener("child-attached",function(i){i.detail.el.parentNode===e&&(t.children.push(i.detail.el),t.update())})},update:function(t){var e,u,d=this.children,h=this.data,l=this.el,f=d.length,p=l.getComputedAttribute("position");switch(h.type){case"box":e=i;break;case"circle":e=n;break;case"cube":e=o;break;case"dodecahedron":e=a;break;case"pyramid":e=s;break;default:e=r}u=e(h,f,p),c(d,u)},remove:function(){this.el.removeEventListener("child-attached",this.childAttachedCallback),c(this.children,this.initialPositions)}}),t.exports.getBoxPositions=i,t.exports.getCirclePositions=n,t.exports.getLinePositions=r,t.exports.getCubePositions=o,t.exports.getDodecahedronPositions=a,t.exports.getPyramidPositions=s}]);
-},{}],35:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 var ImprovedNoise = require('./lib/ImprovedNoise.js');
 
 /**
@@ -4481,7 +3770,7 @@ AFRAME.registerPrimitive('a-mountain', {
   }
 });
 
-},{"./lib/ImprovedNoise.js":36}],36:[function(require,module,exports){
+},{"./lib/ImprovedNoise.js":35}],35:[function(require,module,exports){
 // http://mrl.nyu.edu/~perlin/noise/
 
 var ImprovedNoise = function () {
@@ -4556,7 +3845,7 @@ var ImprovedNoise = function () {
 
 module.exports = ImprovedNoise;
 
-},{}],37:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 var CANNON = require('cannon'),
     math = require('./src/components/math');
 
@@ -4582,7 +3871,7 @@ module.exports = {
 // Export CANNON.js.
 window.CANNON = window.CANNON || CANNON;
 
-},{"./src/components/body/dynamic-body":40,"./src/components/body/static-body":41,"./src/components/math":42,"./src/system/physics":46,"cannon":52}],38:[function(require,module,exports){
+},{"./src/components/body/dynamic-body":39,"./src/components/body/static-body":40,"./src/components/math":41,"./src/system/physics":45,"cannon":51}],37:[function(require,module,exports){
 /**
  * CANNON.shape2mesh
  *
@@ -4742,7 +4031,7 @@ CANNON.shape2mesh = function(body){
 
 module.exports = CANNON.shape2mesh;
 
-},{"cannon":52}],39:[function(require,module,exports){
+},{"cannon":51}],38:[function(require,module,exports){
 var CANNON = require('cannon'),
     mesh2shape = require('three-to-cannon');
 
@@ -4989,7 +4278,7 @@ module.exports = {
   }())
 };
 
-},{"../../../lib/CANNON-shape2mesh":38,"cannon":52,"three-to-cannon":58}],40:[function(require,module,exports){
+},{"../../../lib/CANNON-shape2mesh":37,"cannon":51,"three-to-cannon":57}],39:[function(require,module,exports){
 var Body = require('./body');
 
 /**
@@ -5011,7 +4300,7 @@ module.exports = AFRAME.utils.extend({}, Body, {
   }
 });
 
-},{"./body":39}],41:[function(require,module,exports){
+},{"./body":38}],40:[function(require,module,exports){
 var Body = require('./body');
 
 /**
@@ -5026,7 +4315,7 @@ module.exports = AFRAME.utils.extend({}, Body, {
   }
 });
 
-},{"./body":39}],42:[function(require,module,exports){
+},{"./body":38}],41:[function(require,module,exports){
 module.exports = {
   'velocity':   require('./velocity'),
   'quaternion': require('./quaternion'),
@@ -5043,7 +4332,7 @@ module.exports = {
   }
 };
 
-},{"./quaternion":43,"./velocity":44}],43:[function(require,module,exports){
+},{"./quaternion":42,"./velocity":43}],42:[function(require,module,exports){
 /**
  * Quaternion.
  *
@@ -5072,7 +4361,7 @@ module.exports = {
   }
 };
 
-},{}],44:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 /**
  * Velocity, in m/s.
  */
@@ -5118,7 +4407,7 @@ module.exports = {
   }
 };
 
-},{}],45:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 module.exports = {
   GRAVITY: -9.8,
   MAX_INTERVAL: 4 / 60,
@@ -5133,7 +4422,7 @@ module.exports = {
   }
 };
 
-},{}],46:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 var CANNON = require('cannon'),
     CONSTANTS = require('../constants'),
     C_GRAV = CONSTANTS.GRAVITY,
@@ -5292,9 +4581,9 @@ module.exports = {
   }
 };
 
-},{"../constants":45,"cannon":52}],47:[function(require,module,exports){
+},{"../constants":44,"cannon":51}],46:[function(require,module,exports){
 !function(t){function n(e){if(r[e])return r[e].exports;var o=r[e]={exports:{},id:e,loaded:!1};return t[e].call(o.exports,o,o.exports,n),o.loaded=!0,o.exports}var r={};return n.m=t,n.c=r,n.p="",n(0)}([function(t,n,r){function e(t,n,r){return new Promise(function(e){f(n).then(function(){h[t]={template:c(n)(r.trim()),type:n},e(h[t])})})}function o(t,n,r){switch(n){case b:return t(r);case g:return t(r);case x:return Mustache.render(t,r);case j:return t.render(r);default:return console.log(t),console.log(r),p(t,r)}}function i(t,n){var r=document.querySelector(t),o=r.getAttribute("type"),i=r.innerHTML;if(!n){if(!o)throw new Error("Must provide `type` attribute for <script> templates (e.g., handlebars, jade, nunjucks, html)");if(-1!==o.indexOf("handlebars"))n=b;else if(-1!==o.indexOf("jade"))n=g;else if(-1!==o.indexOf("mustache"))n=x;else if(-1!==o.indexOf("nunjucks"))n=j;else{if(-1===o.indexOf("html"))return void v("Template type could not be inferred from the script tag. Please add a type.");n=w}}return new Promise(function(r){e(t,n,i).then(function(t){r(t,n)})})}function u(t,n){return new Promise(function(r){var o;o=new XMLHttpRequest,o.addEventListener("load",function(){e(t,n,o.response).then(function(t){r(t,n)})}),o.open("GET",t),o.send()})}function c(t){switch(t){case b:return s;case g:return a;case x:return s;case j:return l;default:return function(t){return t}}}function s(t){return Handlebars.compile(t)}function a(t){return jade.compile(t)}function l(t){return nunjucks.compile(t)}function f(t){return new Promise(function(n){if(!t||"html"===t)return n();var r=S[t];if(S[t]===!0)return n();r||(r=document.createElement("script"),S[t]=r,r.setAttribute("src",O[t]),m('Lazy-loading %s engine. Please add <script src="%s"> to your page.',t,O[t]),document.body.appendChild(r));var e=r.onload||function(){};r.onload=function(){e(),S[t]=!0,n()}})}var p=r(11),d=AFRAME.utils.debug,y=AFRAME.utils.extend,h={},v=d("template-component:error"),m=d("template-component:info"),b="handlebars",g="jade",x="mustache",j="nunjucks",w="html",S={};S[b]=!!window.Handlebars,S[g]=!!window.jade,S[x]=!!window.Mustache,S[j]=!!window.nunjucks;var O={};O[b]="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js",O[g]="https://cdnjs.cloudflare.com/ajax/libs/jade/1.11.0/jade.min.js",O[x]="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js",O[j]="https://cdnjs.cloudflare.com/ajax/libs/nunjucks/2.3.0/nunjucks.min.js",AFRAME.registerComponent("template",{schema:{insert:{"default":"beforeend"},type:{"default":""},src:{"default":""},data:{"default":""}},update:function(t){var n=this.data,r=this.el,e="#"===n.src[0]?i:u,o=h[n.src];if(t&&t.src!==n.src)for(;r.firstChild;)r.removeChild(r.firstChild);return o?void this.renderTemplate(o):void e(n.src,n.type).then(this.renderTemplate.bind(this))},renderTemplate:function(t){var n=this.el,r=this.data,e={};Object.keys(n.dataset).forEach(function(t){e[t]=n.dataset[t]}),r.data&&(e=y(e,n.getComputedAttribute(r.data)));var i=o(t.template,t.type,e);n.insertAdjacentHTML(r.insert,i)}}),AFRAME.registerComponent("template-set",{schema:{on:{type:"string"},src:{type:"string"},data:{type:"string"}},init:function(){var t=this.data,n=this.el;n.addEventListener(t.on,function(){n.setAttribute("template",{src:t.src,data:t.data})})}})},function(t,n){"use strict";var r=Array.prototype.forEach,e=Object.create;t.exports=function(t){var n=e(null);return r.call(arguments,function(t){n[t]=!0}),n}},function(t,n){"use strict";t.exports=function(t){if(null==t)throw new TypeError("Cannot use null or undefined");return t}},function(t,n,r){"use strict";t.exports=r(12)()?Array.from:r(13)},function(t,n){"use strict";var r=Array.prototype.forEach,e=Object.create,o=function(t,n){var r;for(r in t)n[r]=t[r]};t.exports=function(t){var n=e(null);return r.call(arguments,function(t){null!=t&&o(Object(t),n)}),n}},function(t,n,r){"use strict";t.exports=r(28)()?Object.assign:r(29)},function(t,n){"use strict";t.exports=function(t){return"function"==typeof t}},function(t,n){"use strict";t.exports=function(t){if("function"!=typeof t)throw new TypeError(t+" is not a function");return t}},function(t,n,r){"use strict";t.exports=r(33)()?String.prototype.contains:r(34)},function(t,n,r){"use strict";var e=r(3),o=r(1);t.exports=o.apply(null,e("\n\r\u2028\u2029"))},function(t,n,r){"use strict";var e,o,i,u,c,s,a,l,f,p,d=r(36);c=function(t){return"\\"===t?s:"$"===t?a:(o+=t,c)},s=function(t){return"\\"!==t&&"$"!==t&&(o+="\\"),o+=t,c},a=function(t){return"{"===t?(i.push(o),o="",l):"$"===t?(o+="$",a):(o+="$"+t,c)},l=function(t){var n,r=p.slice(e);return d(r,"}",function(t){return d.nest>=0?d.next():void(n=t)}),null!=n?(u.push(p.slice(e,e+n)),e+=n,o="",c):(n=r.length,e+=n,o+=r,l)},f=function(t){return"\\"!==t&&"}"!==t&&(o+="\\"),o+=t,l},t.exports=function(t){var n,r,d;for(o="",i=[],u=[],p=String(t),n=p.length,r=c,e=0;n>e;++e)r=r(p[e]);return r===c?i.push(o):r===s?i.push(o+"\\"):r===a?i.push(o+"$"):r===l?i[i.length-1]+="${"+o:r===f&&(i[i.length-1]+="${"+o+"\\"),d={literals:i,substitutions:u},i=u=null,d}},function(t,n,r){"use strict";var e=r(10),o=r(41);t.exports=function(t,n){return o(e(t),n,arguments[2])}},function(t,n){"use strict";t.exports=function(){var t,n,r=Array.from;return"function"!=typeof r?!1:(t=["raz","dwa"],n=r(t),Boolean(n&&n!==t&&"dwa"===n[1]))}},function(t,n,r){"use strict";var e=r(20).iterator,o=r(14),i=r(15),u=r(27),c=r(7),s=r(2),a=r(35),l=Array.isArray,f=Function.prototype.call,p={configurable:!0,enumerable:!0,writable:!0,value:null},d=Object.defineProperty;t.exports=function(t){var n,r,y,h,v,m,b,g,x,j,w=arguments[1],S=arguments[2];if(t=Object(s(t)),null!=w&&c(w),this&&this!==Array&&i(this))n=this;else{if(!w){if(o(t))return v=t.length,1!==v?Array.apply(null,t):(h=new Array(1),h[0]=t[0],h);if(l(t)){for(h=new Array(v=t.length),r=0;v>r;++r)h[r]=t[r];return h}}h=[]}if(!l(t))if(void 0!==(x=t[e])){for(b=c(x).call(t),n&&(h=new n),g=b.next(),r=0;!g.done;)j=w?f.call(w,S,g.value,r):g.value,n?(p.value=j,d(h,r,p)):h[r]=j,g=b.next(),++r;v=r}else if(a(t)){for(v=t.length,n&&(h=new n),r=0,y=0;v>r;++r)j=t[r],v>r+1&&(m=j.charCodeAt(0),m>=55296&&56319>=m&&(j+=t[++r])),j=w?f.call(w,S,j,y):j,n?(p.value=j,d(h,y,p)):h[y]=j,++y;v=y}if(void 0===v)for(v=u(t.length),n&&(h=new n(v)),r=0;v>r;++r)j=w?f.call(w,S,t[r],r):t[r],n?(p.value=j,d(h,r,p)):h[r]=j;return n&&(p.value=null,h.length=v),h}},function(t,n){"use strict";var r=Object.prototype.toString,e=r.call(function(){return arguments}());t.exports=function(t){return r.call(t)===e}},function(t,n,r){"use strict";var e=Object.prototype.toString,o=e.call(r(16));t.exports=function(t){return"function"==typeof t&&e.call(t)===o}},function(t,n){"use strict";t.exports=function(){}},function(t,n,r){"use strict";t.exports=r(18)()?Math.sign:r(19)},function(t,n){"use strict";t.exports=function(){var t=Math.sign;return"function"!=typeof t?!1:1===t(10)&&-1===t(-20)}},function(t,n){"use strict";t.exports=function(t){return t=Number(t),isNaN(t)||0===t?t:t>0?1:-1}},function(t,n,r){"use strict";t.exports=r(21)()?Symbol:r(24)},function(t,n){"use strict";var r={object:!0,symbol:!0};t.exports=function(){var t;if("function"!=typeof Symbol)return!1;t=Symbol("test symbol");try{String(t)}catch(n){return!1}return r[typeof Symbol.iterator]&&r[typeof Symbol.toPrimitive]?!!r[typeof Symbol.toStringTag]:!1}},function(t,n){"use strict";t.exports=function(t){return t?"symbol"==typeof t?!0:t.constructor?"Symbol"!==t.constructor.name?!1:"Symbol"===t[t.constructor.toStringTag]:!1:!1}},function(t,n,r){"use strict";var e,o=r(5),i=r(4),u=r(6),c=r(8);e=t.exports=function(t,n){var r,e,u,s,a;return arguments.length<2||"string"!=typeof t?(s=n,n=t,t=null):s=arguments[2],null==t?(r=u=!0,e=!1):(r=c.call(t,"c"),e=c.call(t,"e"),u=c.call(t,"w")),a={value:n,configurable:r,enumerable:e,writable:u},s?o(i(s),a):a},e.gs=function(t,n,r){var e,s,a,l;return"string"!=typeof t?(a=r,r=n,n=t,t=null):a=arguments[3],null==n?n=void 0:u(n)?null==r?r=void 0:u(r)||(a=r,r=void 0):(a=n,n=r=void 0),null==t?(e=!0,s=!1):(e=c.call(t,"c"),s=c.call(t,"e")),l={get:n,set:r,configurable:e,enumerable:s},a?o(i(a),l):l}},function(t,n,r){"use strict";var e,o,i,u,c=r(23),s=r(25),a=Object.create,l=Object.defineProperties,f=Object.defineProperty,p=Object.prototype,d=a(null);if("function"==typeof Symbol){e=Symbol;try{String(e()),u=!0}catch(y){}}var h=function(){var t=a(null);return function(n){for(var r,e,o=0;t[n+(o||"")];)++o;return n+=o||"",t[n]=!0,r="@@"+n,f(p,r,c.gs(null,function(t){e||(e=!0,f(this,r,c(t)),e=!1)})),r}}();i=function(t){if(this instanceof i)throw new TypeError("TypeError: Symbol is not a constructor");return o(t)},t.exports=o=function v(t){var n;if(this instanceof v)throw new TypeError("TypeError: Symbol is not a constructor");return u?e(t):(n=a(i.prototype),t=void 0===t?"":String(t),l(n,{__description__:c("",t),__name__:c("",h(t))}))},l(o,{"for":c(function(t){return d[t]?d[t]:d[t]=o(String(t))}),keyFor:c(function(t){var n;s(t);for(n in d)if(d[n]===t)return n}),hasInstance:c("",e&&e.hasInstance||o("hasInstance")),isConcatSpreadable:c("",e&&e.isConcatSpreadable||o("isConcatSpreadable")),iterator:c("",e&&e.iterator||o("iterator")),match:c("",e&&e.match||o("match")),replace:c("",e&&e.replace||o("replace")),search:c("",e&&e.search||o("search")),species:c("",e&&e.species||o("species")),split:c("",e&&e.split||o("split")),toPrimitive:c("",e&&e.toPrimitive||o("toPrimitive")),toStringTag:c("",e&&e.toStringTag||o("toStringTag")),unscopables:c("",e&&e.unscopables||o("unscopables"))}),l(i.prototype,{constructor:c(o),toString:c("",function(){return this.__name__})}),l(o.prototype,{toString:c(function(){return"Symbol ("+s(this).__description__+")"}),valueOf:c(function(){return s(this)})}),f(o.prototype,o.toPrimitive,c("",function(){var t=s(this);return"symbol"==typeof t?t:t.toString()})),f(o.prototype,o.toStringTag,c("c","Symbol")),f(i.prototype,o.toStringTag,c("c",o.prototype[o.toStringTag])),f(i.prototype,o.toPrimitive,c("c",o.prototype[o.toPrimitive]))},function(t,n,r){"use strict";var e=r(22);t.exports=function(t){if(!e(t))throw new TypeError(t+" is not a symbol");return t}},function(t,n,r){"use strict";var e=r(17),o=Math.abs,i=Math.floor;t.exports=function(t){return isNaN(t)?0:(t=Number(t),0!==t&&isFinite(t)?e(t)*i(o(t)):t)}},function(t,n,r){"use strict";var e=r(26),o=Math.max;t.exports=function(t){return o(0,e(t))}},function(t,n){"use strict";t.exports=function(){var t,n=Object.assign;return"function"!=typeof n?!1:(t={foo:"raz"},n(t,{bar:"dwa"},{trzy:"trzy"}),t.foo+t.bar+t.trzy==="razdwatrzy")}},function(t,n,r){"use strict";var e=r(30),o=r(2),i=Math.max;t.exports=function(t,n){var r,u,c,s=i(arguments.length,2);for(t=Object(o(t)),c=function(e){try{t[e]=n[e]}catch(o){r||(r=o)}},u=1;s>u;++u)n=arguments[u],e(n).forEach(c);if(void 0!==r)throw r;return t}},function(t,n,r){"use strict";t.exports=r(31)()?Object.keys:r(32)},function(t,n){"use strict";t.exports=function(){try{return Object.keys("primitive"),!0}catch(t){return!1}}},function(t,n){"use strict";var r=Object.keys;t.exports=function(t){return r(null==t?t:Object(t))}},function(t,n){"use strict";var r="razdwatrzy";t.exports=function(){return"function"!=typeof r.contains?!1:r.contains("dwa")===!0&&r.contains("foo")===!1}},function(t,n){"use strict";var r=String.prototype.indexOf;t.exports=function(t){return r.call(this,t,arguments[1])>-1}},function(t,n){"use strict";var r=Object.prototype.toString,e=r.call("");t.exports=function(t){return"string"==typeof t||t&&"object"==typeof t&&(t instanceof String||r.call(t)===e)||!1}},function(t,n,r){"use strict";var e,o,i,u,c,s,a,l,f,p,d,y,h,v,m,b,g,x,j,w,S,O,A,T,E,k,P,M=r(3),_=r(1),C=r(2),$=r(7),z=r(39),F=r(9),N=r(38),L=Object.prototype.hasOwnProperty,H=_.apply(null,M(";{=([,<>+-*/%&|^!~?:}")),R=_.apply(null,M(";{=([,<>+-*/%&|^!~?:})]."));e=function(t){if(y&&!(d>=t))for(;d!==t;){if(!y)return;L.call(N,y)?L.call(F,y)&&(v=d,++h):b=y,y=w[++d]}},o=function(t){null!=E&&x.push([k,E,t]),k={point:d+1,line:h,column:d+1-v},E=d},i=function(){var t;return k.raw=w.slice(E,d),j.push(k),x.length?(t=x.pop(),k=t[0],E=t[1],void(P=t[2])):(k=null,E=null,void(P=null))},u=function(){var t=P;return P=g,++g,e(d+1),o(t),c},s=function(){if("'"===y||'"'===y)return T=y,y=w[++d],a;if("("===y||"{"===y||"["===y)++g;else if(")"===y||"}"===y||"]"===y)P===--g&&i();else if("/"===y&&L.call(H,b))return y=w[++d],p;return y!==S||!O&&b&&!m&&!L.call(R,b)?(b=y,y=w[++d],c):A(d,b,g)},l=function(){for(;;){if(!y)return;if(L.call(F,y))return v=d+1,void++h;y=w[++d]}},f=function(){for(;;){if(!y)return;if("*"!==y)L.call(F,y)&&(v=d+1,++h),y=w[++d];else if(y=w[++d],"/"===y)return}},c=function(){var t;for(m=!1;;){if(!y)return;if(L.call(N,y))m=!0,L.call(F,y)&&(v=d+1,++h);else{if("/"!==y)break;if(t=w[d+1],"/"===t)y=w[d+=2],m=!0,l();else{if("*"!==t)break;y=w[d+=2],m=!0,f()}}y=w[++d]}return s},a=function(){for(;;){if(!y)return;if(y===T)return y=w[++d],b=T,c;"\\"===y&&L.call(F,w[++d])&&(v=d+1,++h),y=w[++d]}},p=function(){for(;;){if(!y)return;if("/"===y)return b="/",y=w[++d],c;"\\"===y&&++d,y=w[++d]}},t.exports=n=function(t,r,e){var o;if(w=String(C(t)),S=String(C(r)),1!==S.length)throw new TypeError(S+" should be one character long string");for(A=$(e),O=L.call(R,S),d=0,y=w[d],h=1,v=0,m=!1,b=null,g=0,x=[],j=[],n.forceStop=!1,o=c;o;)o=o();return j},Object.defineProperties(n,{$ws:z(c),$common:z(s),collectNest:z(u),move:z(e),index:z.gs(function(){return d}),line:z.gs(function(){return h}),nest:z.gs(function(){return g}),columnIndex:z.gs(function(){return v}),next:z(function(t){return y?(e(d+(t||1)),c()):void 0}),resume:z(function(){return s})})},function(t,n,r){"use strict";var e=r(3),o=r(1);t.exports=o.apply(null,e(" \f	\x0B​  ​᠎ ​  ​  ​  ​  ​  ​​​  ​　"))},function(t,n,r){"use strict";var e=r(1),o=r(9),i=r(37);t.exports=e.apply(null,Object.keys(o).concat(Object.keys(i)))},function(t,n,r){"use strict";var e,o=r(5),i=r(4),u=r(6),c=r(8);e=t.exports=function(t,n){var r,e,u,s,a;return arguments.length<2||"string"!=typeof t?(s=n,n=t,t=null):s=arguments[2],null==t?(r=u=!0,e=!1):(r=c.call(t,"c"),e=c.call(t,"e"),u=c.call(t,"w")),a={value:n,configurable:r,enumerable:e,writable:u},s?o(i(s),a):a},e.gs=function(t,n,r){var e,s,a,l;return"string"!=typeof t?(a=r,r=n,n=t,t=null):a=arguments[3],null==n?n=void 0:u(n)?null==r?r=void 0:u(r)||(a=r,r=void 0):(a=n,n=r=void 0),null==t?(e=!0,s=!1):(e=c.call(t,"c"),s=c.call(t,"e")),l={get:n,set:r,configurable:e,enumerable:s},a?o(i(a),l):l}},function(t,n){"use strict";var r=Array.prototype.reduce;t.exports=function(t){var n=arguments;return r.call(t,function(t,r,e){return t+(void 0===n[e]?"":String(n[e]))+r})}},function(t,n,r){"use strict";var e=r(42),o=r(40);t.exports=function(t,n){return o.apply(null,e(t,n,arguments[2]))}},function(t,n,r){"use strict";var e=r(2),o=r(4),i=Array.prototype.map,u=Object.keys,c=JSON.stringify;t.exports=function(t,n){var r,s,a,l=Object(arguments[2]);return e(t)&&e(t.literals)&&e(t.substitutions),n=o(n),r=u(n),s=r.join(", "),a=r.map(function(t){return n[t]}),[t.literals].concat(i.call(t.substitutions,function(t){var n;if(t){try{n=new Function(s,"return ("+t+")")}catch(r){throw new TypeError("Unable to compile expression:\n	args: "+c(s)+"\n	body: "+c(t)+"\n	error: "+r.stack)}try{return n.apply(null,a)}catch(r){if(l.partial)return"${"+t+"}";throw new TypeError("Unable to resolve expression:\n	args: "+c(s)+"\n	body: "+c(t)+"\n	error: "+r.stack)}}}))}}]);
-},{}],48:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 /* global AFRAME, THREE */
 
 if (typeof AFRAME === 'undefined') {
@@ -5404,7 +4693,7 @@ AFRAME.registerComponent('terrain-model', {
   }
 });
 
-},{"./lib/terrainloader.js":49}],49:[function(require,module,exports){
+},{"./lib/terrainloader.js":48}],48:[function(require,module,exports){
 /**
  * For loading binary data into a 3D terrain model
  * @author Bjorn Sandvik / http://thematicmapping.org/
@@ -5446,7 +4735,7 @@ THREE.TerrainLoader.prototype = {
         this.crossOrigin = value;
     }
 };
-},{}],50:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 (function (global){
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.AFRAME = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 'use strict';
@@ -73123,7 +72412,7 @@ module.exports = getWakeLock();
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],51:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 /*
  * Anime v1.1.1
  * http://anime-js.com
@@ -73757,7 +73046,7 @@ module.exports = getWakeLock();
 
 }));
 
-},{}],52:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 (function (global){
 /*
  * Copyright (c) 2015 cannon.js Authors
@@ -87447,7 +86736,7 @@ World.prototype.clearForces = function(){
 (2)
 });
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],53:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 var pSlice = Array.prototype.slice;
 var objectKeys = require('./lib/keys.js');
 var isArguments = require('./lib/is_arguments.js');
@@ -87543,7 +86832,7 @@ function objEquiv(a, b, opts) {
   return typeof a === typeof b;
 }
 
-},{"./lib/is_arguments.js":54,"./lib/keys.js":55}],54:[function(require,module,exports){
+},{"./lib/is_arguments.js":53,"./lib/keys.js":54}],53:[function(require,module,exports){
 var supportsArgumentsClass = (function(){
   return Object.prototype.toString.call(arguments)
 })() == '[object Arguments]';
@@ -87565,7 +86854,7 @@ function unsupported(object){
     false;
 };
 
-},{}],55:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 exports = module.exports = typeof Object.keys === 'function'
   ? Object.keys : shim;
 
@@ -87576,7 +86865,7 @@ function shim (obj) {
   return keys;
 }
 
-},{}],56:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 'use strict';
 /* @flow */
 
@@ -87650,7 +86939,7 @@ function linearRegression(data/*: Array<Array<number>> */)/*: { m: number, b: nu
 
 module.exports = linearRegression;
 
-},{}],57:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 'use strict';
 /* @flow */
 
@@ -87682,7 +86971,7 @@ function linearRegressionLine(mb/*: { b: number, m: number }*/)/*: Function */ {
 
 module.exports = linearRegressionLine;
 
-},{}],58:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 var CANNON = require('cannon'),
     quickhull = require('./lib/THREE.quickhull');
 
@@ -88026,7 +87315,7 @@ function getMeshes (object) {
   return meshes;
 }
 
-},{"./lib/THREE.quickhull":59,"cannon":52}],59:[function(require,module,exports){
+},{"./lib/THREE.quickhull":58,"cannon":51}],58:[function(require,module,exports){
 /**
 
   QuickHull
@@ -88478,7 +87767,718 @@ module.exports = (function(){
 
 }())
 
-},{}],60:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+exports.default = aframeDraggableComponent;
+
+var _deepEqual = require('deep-equal');
+
+var _deepEqual2 = _interopRequireDefault(_deepEqual);
+
+var _linear_regression = require('simple-statistics/src/linear_regression');
+
+var _linear_regression2 = _interopRequireDefault(_linear_regression);
+
+var _linear_regression_line = require('simple-statistics/src/linear_regression_line');
+
+var _linear_regression_line2 = _interopRequireDefault(_linear_regression_line);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var COMPONENT_NAME = 'click-drag';
+var DRAG_START_EVENT = 'dragstart';
+var DRAG_MOVE_EVENT = 'dragmove';
+var DRAG_END_EVENT = 'dragend';
+
+var TIME_TO_KEEP_LOG = 300;
+
+function forceWorldUpdate(threeElement) {
+
+  var element = threeElement;
+  while (element.parent) {
+    element = element.parent;
+  }
+
+  element.updateMatrixWorld(true);
+}
+
+function forEachParent(element, lambda) {
+  while (element.attachedToParent) {
+    element = element.parentElement;
+    lambda(element);
+  }
+}
+
+function someParent(element, lambda) {
+  while (element.attachedToParent) {
+    element = element.parentElement;
+    if (lambda(element)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function cameraPositionToVec3(camera, vec3) {
+
+  vec3.set(camera.components.position.data.x, camera.components.position.data.y, camera.components.position.data.z);
+
+  forEachParent(camera, function (element) {
+
+    if (element.components && element.components.position) {
+      vec3.set(vec3.x + element.components.position.data.x, vec3.y + element.components.position.data.y, vec3.z + element.components.position.data.z);
+    }
+  });
+}
+
+function localToWorld(THREE, threeCamera, vector) {
+  forceWorldUpdate(threeCamera);
+  return threeCamera.localToWorld(vector);
+}
+
+var _ref = function unprojectFunction() {
+
+  var initialized = false;
+
+  var matrix = void 0;
+
+  function initialize(THREE) {
+    matrix = new THREE.Matrix4();
+
+    return true;
+  }
+
+  return {
+    unproject: function unproject(THREE, vector, camera) {
+
+      var threeCamera = camera.components.camera.camera;
+
+      initialized = initialized || initialize(THREE);
+
+      vector.applyProjection(matrix.getInverse(threeCamera.projectionMatrix));
+
+      return localToWorld(THREE, threeCamera, vector);
+    }
+  };
+}(),
+    unproject = _ref.unproject;
+
+function clientCoordsTo3DCanvasCoords(clientX, clientY, offsetX, offsetY, clientWidth, clientHeight) {
+  return {
+    x: (clientX - offsetX) / clientWidth * 2 - 1,
+    y: -((clientY - offsetY) / clientHeight) * 2 + 1
+  };
+}
+
+var _ref2 = function screenCoordsToDirectionFunction() {
+
+  var initialized = false;
+
+  var mousePosAsVec3 = void 0;
+  var cameraPosAsVec3 = void 0;
+
+  function initialize(THREE) {
+    mousePosAsVec3 = new THREE.Vector3();
+    cameraPosAsVec3 = new THREE.Vector3();
+
+    return true;
+  }
+
+  return {
+    screenCoordsToDirection: function screenCoordsToDirection(THREE, aframeCamera, _ref3) {
+      var clientX = _ref3.x,
+          clientY = _ref3.y;
+
+
+      initialized = initialized || initialize(THREE);
+
+      // scale mouse coordinates down to -1 <-> +1
+
+      var _clientCoordsTo3DCanv = clientCoordsTo3DCanvasCoords(clientX, clientY, 0, 0, // TODO: Replace with canvas position
+      window.innerWidth, window.innerHeight),
+          mouseX = _clientCoordsTo3DCanv.x,
+          mouseY = _clientCoordsTo3DCanv.y;
+
+      mousePosAsVec3.set(mouseX, mouseY, -1);
+
+      // apply camera transformation from near-plane of mouse x/y into 3d space
+      // NOTE: This should be replaced with THREE code directly once the aframe bug
+      // is fixed:
+      /*
+            cameraPositionToVec3(aframeCamera, cameraPosAsVec3);
+            const {x, y, z} = new THREE
+             .Vector3(mouseX, mouseY, -1)
+             .unproject(aframeCamera.components.camera.camera)
+             .sub(cameraPosAsVec3)
+             .normalize();
+      */
+      var projectedVector = unproject(THREE, mousePosAsVec3, aframeCamera);
+
+      cameraPositionToVec3(aframeCamera, cameraPosAsVec3);
+
+      // Get the unit length direction vector from the camera's position
+
+      var _projectedVector$sub$ = projectedVector.sub(cameraPosAsVec3).normalize(),
+          x = _projectedVector$sub$.x,
+          y = _projectedVector$sub$.y,
+          z = _projectedVector$sub$.z;
+
+      return { x: x, y: y, z: z };
+    }
+  };
+}(),
+    screenCoordsToDirection = _ref2.screenCoordsToDirection;
+
+/**
+ * @param planeNormal {THREE.Vector3}
+ * @param planeConstant {Float} Distance from origin of the plane
+ * @param rayDirection {THREE.Vector3} Direction of ray from the origin
+ *
+ * @return {THREE.Vector3} The intersection point of the ray and plane
+ */
+
+
+function rayPlaneIntersection(planeNormal, planeConstant, rayDirection) {
+  // A line from the camera position toward (and through) the plane
+  var distanceToPlane = planeConstant / planeNormal.dot(rayDirection);
+  return rayDirection.multiplyScalar(distanceToPlane);
+}
+
+var _ref4 = function directionToWorldCoordsFunction() {
+
+  var initialized = false;
+
+  var direction = void 0;
+  var cameraPosAsVec3 = void 0;
+
+  function initialize(THREE) {
+    direction = new THREE.Vector3();
+    cameraPosAsVec3 = new THREE.Vector3();
+
+    return true;
+  }
+
+  return {
+    /**
+     * @param camera Three.js Camera instance
+     * @param Object Position of the camera
+     * @param Object position of the mouse (scaled to be between -1 to 1)
+     * @param depth Depth into the screen to calculate world coordinates for
+     */
+    directionToWorldCoords: function directionToWorldCoords(THREE, aframeCamera, camera, _ref5, depth) {
+      var directionX = _ref5.x,
+          directionY = _ref5.y,
+          directionZ = _ref5.z;
+
+
+      initialized = initialized || initialize(THREE);
+
+      cameraPositionToVec3(aframeCamera, cameraPosAsVec3);
+      direction.set(directionX, directionY, directionZ);
+
+      // A line from the camera position toward (and through) the plane
+      var newPosition = rayPlaneIntersection(camera.getWorldDirection(), depth, direction);
+
+      // Reposition back to the camera position
+
+      var _newPosition$add = newPosition.add(cameraPosAsVec3),
+          x = _newPosition$add.x,
+          y = _newPosition$add.y,
+          z = _newPosition$add.z;
+
+      return { x: x, y: y, z: z };
+    }
+  };
+}(),
+    directionToWorldCoords = _ref4.directionToWorldCoords;
+
+var _ref6 = function selectItemFunction() {
+
+  var initialized = false;
+
+  var cameraPosAsVec3 = void 0;
+  var directionAsVec3 = void 0;
+  var raycaster = void 0;
+  var plane = void 0;
+
+  function initialize(THREE) {
+    plane = new THREE.Plane();
+    cameraPosAsVec3 = new THREE.Vector3();
+    directionAsVec3 = new THREE.Vector3();
+    raycaster = new THREE.Raycaster();
+
+    // TODO: From camera values?
+    raycaster.far = Infinity;
+    raycaster.near = 0;
+
+    return true;
+  }
+
+  return {
+    selectItem: function selectItem(THREE, selector, camera, clientX, clientY) {
+
+      initialized = initialized || initialize(THREE);
+
+      var _screenCoordsToDirect = screenCoordsToDirection(THREE, camera, { x: clientX, y: clientY }),
+          directionX = _screenCoordsToDirect.x,
+          directionY = _screenCoordsToDirect.y,
+          directionZ = _screenCoordsToDirect.z;
+
+      cameraPositionToVec3(camera, cameraPosAsVec3);
+      directionAsVec3.set(directionX, directionY, directionZ);
+
+      raycaster.set(cameraPosAsVec3, directionAsVec3);
+
+      // Push meshes onto list of objects to intersect.
+      // TODO: Can we do this at some other point instead of every time a ray is
+      // cast? Is that a micro optimization?
+      var objects = Array.from(camera.sceneEl.querySelectorAll('[' + selector + ']')).map(function (object) {
+        return object.object3D;
+      });
+
+      var recursive = true;
+
+      var intersected = raycaster.intersectObjects(objects, recursive)
+      // Only keep intersections against objects that have a reference to an entity.
+      .filter(function (intersection) {
+        return !!intersection.object.el;
+      })
+      // Only keep ones that are visible
+      .filter(function (intersection) {
+        return intersection.object.parent.visible;
+      })
+      // The first element is the closest
+      [0]; // eslint-disable-line no-unexpected-multiline
+
+      if (!intersected) {
+        return {};
+      }
+
+      var point = intersected.point,
+          object = intersected.object;
+
+      // Aligned to the world direction of the camera
+      // At the specified intersection point
+
+      plane.setFromNormalAndCoplanarPoint(camera.components.camera.camera.getWorldDirection().clone().negate(), point.clone().sub(cameraPosAsVec3));
+
+      var depth = plane.constant;
+
+      var offset = point.sub(object.getWorldPosition());
+
+      return { depth: depth, offset: offset, element: object.el };
+    }
+  };
+}(),
+    selectItem = _ref6.selectItem;
+
+function dragItem(THREE, element, offset, camera, depth, mouseInfo) {
+
+  var threeCamera = camera.components.camera.camera;
+
+  // Setting up for rotation calculations
+  var startCameraRotationInverse = threeCamera.getWorldQuaternion().inverse();
+  var startElementRotation = element.object3D.getWorldQuaternion();
+  var elementRotationOrder = element.object3D.rotation.order;
+
+  var rotationQuaternion = new THREE.Quaternion();
+  var rotationEuler = element.object3D.rotation.clone();
+
+  var offsetVector = new THREE.Vector3(offset.x, offset.y, offset.z);
+  var lastMouseInfo = mouseInfo;
+
+  var nextRotation = {
+    x: THREE.Math.radToDeg(rotationEuler.x),
+    y: THREE.Math.radToDeg(rotationEuler.y),
+    z: THREE.Math.radToDeg(rotationEuler.z)
+  };
+
+  var activeCamera = element.sceneEl.systems.camera.activeCameraEl;
+
+  var isChildOfActiveCamera = someParent(element, function (parent) {
+    return parent === activeCamera;
+  });
+
+  function onMouseMove(_ref7) {
+    var clientX = _ref7.clientX,
+        clientY = _ref7.clientY;
+
+
+    lastMouseInfo = { clientX: clientX, clientY: clientY };
+
+    var direction = screenCoordsToDirection(THREE, camera, { x: clientX, y: clientY });
+
+    var _directionToWorldCoor = directionToWorldCoords(THREE, camera, camera.components.camera.camera, direction, depth),
+        x = _directionToWorldCoor.x,
+        y = _directionToWorldCoor.y,
+        z = _directionToWorldCoor.z;
+
+    var rotationDiff = void 0;
+
+    // Start by rotating backwards from the initial camera rotation
+    rotationDiff = rotationQuaternion.copy(startCameraRotationInverse);
+
+    // rotate the offset
+    offsetVector.set(offset.x, offset.y, offset.z);
+
+    // Then add the current camera rotation
+    rotationDiff = rotationQuaternion.multiply(threeCamera.getWorldQuaternion());
+
+    offsetVector.applyQuaternion(rotationDiff);
+
+    if (!isChildOfActiveCamera) {
+      // And correctly offset rotation
+      rotationDiff.multiply(startElementRotation);
+
+      rotationEuler.setFromQuaternion(rotationDiff, elementRotationOrder);
+    }
+
+    nextRotation.x = THREE.Math.radToDeg(rotationEuler.x);
+    nextRotation.y = THREE.Math.radToDeg(rotationEuler.y);
+    nextRotation.z = THREE.Math.radToDeg(rotationEuler.z);
+
+    var nextPosition = { x: x - offsetVector.x, y: y - offsetVector.y, z: z - offsetVector.z };
+
+    // When the element has parents, we need to convert its new world position
+    // into new local position of its parent element
+    if (element.parentEl !== element.sceneEl) {
+
+      // The new world position
+      offsetVector.set(nextPosition.x, nextPosition.y, nextPosition.z);
+
+      // Converted
+      element.parentEl.object3D.worldToLocal(offsetVector);
+
+      nextPosition.x = offsetVector.x;
+      nextPosition.y = offsetVector.y;
+      nextPosition.z = offsetVector.z;
+    }
+
+    element.emit(DRAG_MOVE_EVENT, { nextPosition: nextPosition, nextRotation: nextRotation, clientX: clientX, clientY: clientY });
+
+    //element.setAttribute('position', nextPosition);
+
+    //element.setAttribute('rotation', nextRotation);
+  }
+
+  function onTouchMove(_ref8) {
+    var _ref8$changedTouches = _slicedToArray(_ref8.changedTouches, 1),
+        touchInfo = _ref8$changedTouches[0];
+
+    onMouseMove(touchInfo);
+  }
+
+  function onCameraChange(_ref9) {
+    var detail = _ref9.detail;
+
+    if ((detail.name === 'position' || detail.name === 'rotation') && !(0, _deepEqual2.default)(detail.oldData, detail.newData)) {
+      onMouseMove(lastMouseInfo);
+    }
+  }
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('touchmove', onTouchMove);
+  camera.addEventListener('componentchanged', onCameraChange);
+
+  // The "unlisten" function
+  return function (_) {
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('touchmove', onTouchMove);
+    camera.removeEventListener('componentchanged', onCameraChange);
+  };
+}
+
+// Closure to close over the removal of the event listeners
+
+var _ref10 = function getDidMountAndUnmount() {
+
+  var removeClickListeners = void 0;
+  var removeDragListeners = void 0;
+  var cache = [];
+
+  function initialize(THREE, componentName) {
+
+    // TODO: Based on a scene from the element passed in?
+    var scene = document.querySelector('a-scene');
+    // delay loading of this as we're not 100% if the scene has loaded yet or not
+    var camera = void 0;
+    var draggedElement = void 0;
+    var dragInfo = void 0;
+    var positionLog = [];
+
+    function cleanUpPositionLog() {
+      var now = performance.now();
+      while (positionLog.length && now - positionLog[0].time > TIME_TO_KEEP_LOG) {
+        // remove the first element;
+        positionLog.shift();
+      }
+    }
+
+    function onDragged(_ref11) {
+      var nextPosition = _ref11.detail.nextPosition;
+
+      // Continuously clean up so we don't get huge logs built up
+      cleanUpPositionLog();
+      positionLog.push({
+        position: Object.assign({}, nextPosition),
+        time: performance.now()
+      });
+    }
+
+    function onMouseDown(_ref12) {
+      var clientX = _ref12.clientX,
+          clientY = _ref12.clientY;
+
+      var _selectItem = selectItem(THREE, componentName, camera, clientX, clientY),
+          depth = _selectItem.depth,
+          offset = _selectItem.offset,
+          element = _selectItem.element;
+
+      if (element) {
+        (function () {
+          // Can only drag one item at a time, so no need to check if any
+          // listener is already set up
+          var removeDragItemListeners = dragItem(THREE, element, offset, camera, depth, {
+            clientX: clientX,
+            clientY: clientY
+          });
+
+          draggedElement = element;
+
+          dragInfo = {
+            offset: { x: offset.x, y: offset.y, z: offset.z },
+            depth: depth,
+            clientX: clientX,
+            clientY: clientY
+          };
+
+          element.addEventListener(DRAG_MOVE_EVENT, onDragged);
+
+          removeDragListeners = function removeDragListeners(_) {
+            element.removeEventListener(DRAG_MOVE_EVENT, onDragged);
+            // eslint-disable-next-line no-unused-expressions
+            removeDragItemListeners && removeDragItemListeners();
+            // in case this removal function gets called more than once
+            removeDragItemListeners = null;
+          };
+
+          element.emit(DRAG_START_EVENT, dragInfo);
+        })();
+      }
+    }
+
+    function fitLineToVelocity(dimension) {
+
+      if (positionLog.length < 2) {
+        return 0;
+      }
+
+      var velocities = positionLog
+
+      // Pull out just the x, y, or z values
+      .map(function (log) {
+        return { time: log.time, value: log.position[dimension] };
+      })
+
+      // Then convert that into an array of array pairs [time, value]
+      .reduce(function (memo, log, index, collection) {
+
+        // skip the first item (we're looking for pairs)
+        if (index === 0) {
+          return memo;
+        }
+
+        var deltaPosition = log.value - collection[index - 1].value;
+        var deltaTime = (log.time - collection[index - 1].time) / 1000;
+
+        // The new value is the change in position
+        memo.push([log.time, deltaPosition / deltaTime]);
+
+        return memo;
+      }, []);
+
+      // Calculate the line function
+      var lineFunction = (0, _linear_regression_line2.default)((0, _linear_regression2.default)(velocities));
+
+      // Calculate what the point was at the end of the line
+      // ie; the velocity at the time the drag stopped
+      return lineFunction(positionLog[positionLog.length - 1].time);
+    }
+
+    function onMouseUp(_ref13) {
+      var clientX = _ref13.clientX,
+          clientY = _ref13.clientY;
+
+
+      if (!draggedElement) {
+        return;
+      }
+
+      cleanUpPositionLog();
+
+      var velocity = {
+        x: fitLineToVelocity('x'),
+        y: fitLineToVelocity('y'),
+        z: fitLineToVelocity('z')
+      };
+
+      draggedElement.emit(DRAG_END_EVENT, Object.assign({}, dragInfo, { clientX: clientX, clientY: clientY, velocity: velocity }));
+
+      removeDragListeners && removeDragListeners(); // eslint-disable-line no-unused-expressions
+      removeDragListeners = undefined;
+    }
+
+    function onTouchStart(_ref14) {
+      var _ref14$changedTouches = _slicedToArray(_ref14.changedTouches, 1),
+          touchInfo = _ref14$changedTouches[0];
+
+      onMouseDown(touchInfo);
+    }
+
+    function onTouchEnd(_ref15) {
+      var _ref15$changedTouches = _slicedToArray(_ref15.changedTouches, 1),
+          touchInfo = _ref15$changedTouches[0];
+
+      onMouseUp(touchInfo);
+    }
+
+    function run() {
+
+      camera = scene.camera.el;
+
+      // TODO: Attach to canvas?
+      document.addEventListener('mousedown', onMouseDown);
+      document.addEventListener('mouseup', onMouseUp);
+
+      document.addEventListener('touchstart', onTouchStart);
+      document.addEventListener('touchend', onTouchEnd);
+
+      removeClickListeners = function removeClickListeners(_) {
+        document.removeEventListener('mousedown', onMouseDown);
+        document.removeEventListener('mouseup', onMouseUp);
+
+        document.removeEventListener('touchstart', onTouchStart);
+        document.removeEventListener('touchend', onTouchEnd);
+      };
+    }
+
+    if (scene.hasLoaded) {
+      run();
+    } else {
+      scene.addEventListener('loaded', run);
+    }
+  }
+
+  function tearDown() {
+    removeClickListeners && removeClickListeners(); // eslint-disable-line no-unused-expressions
+    removeClickListeners = undefined;
+  }
+
+  return {
+    didMount: function didMount(element, THREE, componentName) {
+
+      if (cache.length === 0) {
+        initialize(THREE, componentName);
+      }
+
+      if (cache.indexOf(element) === -1) {
+        cache.push(element);
+      }
+    },
+    didUnmount: function didUnmount(element) {
+
+      var cacheIndex = cache.indexOf(element);
+
+      removeDragListeners && removeDragListeners(); // eslint-disable-line no-unused-expressions
+      removeDragListeners = undefined;
+
+      if (cacheIndex === -1) {
+        return;
+      }
+
+      // remove that element
+      cache.splice(cacheIndex, 1);
+
+      if (cache.length === 0) {
+        tearDown();
+      }
+    }
+  };
+}(),
+    didMount = _ref10.didMount,
+    didUnmount = _ref10.didUnmount;
+
+/**
+ * @param aframe {Object} The Aframe instance to register with
+ * @param componentName {String} The component name to use. Default: 'click-drag'
+ */
+
+
+function aframeDraggableComponent(aframe) {
+  var componentName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : COMPONENT_NAME;
+
+
+  var THREE = aframe.THREE;
+
+  /**
+   * Draggable component for A-Frame.
+   */
+  aframe.registerComponent(componentName, {
+    schema: {},
+
+    /**
+     * Called once when component is attached. Generally for initial setup.
+     */
+    init: function init() {
+      didMount(this, THREE, componentName);
+    },
+
+
+    /**
+     * Called when component is attached and when component data changes.
+     * Generally modifies the entity based on the data.
+     *
+     * @param oldData
+     */
+    update: function update() {},
+
+
+    /**
+     * Called when a component is removed (e.g., via removeAttribute).
+     * Generally undoes all modifications to the entity.
+     */
+    remove: function remove() {
+      didUnmount(this);
+    },
+
+
+    /**
+     * Called when entity pauses.
+     * Use to stop or remove any dynamic or background behavior such as events.
+     */
+    pause: function pause() {
+      didUnmount(this);
+    },
+
+
+    /**
+     * Called when entity resumes.
+     * Use to continue or add any dynamic or background behavior such as events.
+     */
+    play: function play() {
+      didMount(this, THREE, componentName);
+    }
+  });
+}
+
+},{"deep-equal":52,"simple-statistics/src/linear_regression":55,"simple-statistics/src/linear_regression_line":56}],60:[function(require,module,exports){
 AFRAME.registerComponent('collider-check-and-update', {
   dependencies: ['raycaster'],
   init: function () {
@@ -88560,11 +88560,11 @@ require('./material-side-modifier-ocean.js');
 require('./collider-check.js');
 //now trying to run the update() method of an attached component using the collider to attach
 require('./collider-check-and-update.js');
-
-var clickdrag = require('aframe-click-drag-component');
+//var clickdrag = require('aframe-click-drag-component');
+var clickdrag = require('./clickdrag.js');
 clickdrag.default(AFRAME);
 
-},{"./collider-check-and-update.js":60,"./collider-check.js":61,"./cursor-listener-terrain.js":62,"./cursor-listener.js":63,"./material-side-modifier-mountain.js":65,"./material-side-modifier-ocean.js":66,"./material-side-modifier-terrain-model.js":67,"./material-side-modifier.js":68,"./set-image.js":69,"./single-property-schema-bug.js":70,"./update-raycaster.js":71,"aframe":50,"aframe-animation-component":1,"aframe-click-drag-component":2,"aframe-event-set-component":3,"aframe-extras":4,"aframe-layout-component":34,"aframe-mountain-component":35,"aframe-template-component":47,"aframe-terrain-model-component":48}],65:[function(require,module,exports){
+},{"./clickdrag.js":59,"./collider-check-and-update.js":60,"./collider-check.js":61,"./cursor-listener-terrain.js":62,"./cursor-listener.js":63,"./material-side-modifier-mountain.js":65,"./material-side-modifier-ocean.js":66,"./material-side-modifier-terrain-model.js":67,"./material-side-modifier.js":68,"./set-image.js":69,"./single-property-schema-bug.js":70,"./update-raycaster.js":71,"aframe":49,"aframe-animation-component":1,"aframe-event-set-component":2,"aframe-extras":3,"aframe-layout-component":33,"aframe-mountain-component":34,"aframe-template-component":46,"aframe-terrain-model-component":47}],65:[function(require,module,exports){
 AFRAME.registerComponent('material-side-modifier-mountain', {
   // This component can be used only once
   //multiple: true,
