@@ -41,8 +41,8 @@ Install and use by directly including the [browser files](dist):
   <title>My A-Frame Scene</title>
   <script src="https://aframe.io/releases/0.2.0/aframe.min.js"></script>
   <!--script src="https://rawgit.com/aframevr/aframe/master/dist/aframe.min.js"></script-->
-  <script src="https://rawgit.com/andreasplesch/aframe-faceset-component/master/dist/aframe-faceset-component.min.js"></script>
-  <script src="https://rawgit.com/andreasplesch/aframe-heightgrid-component/master/dist/aframe-heightgrid-component.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/andreasplesch/aframe-faceset-component@master/dist/aframe-faceset-component.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/andreasplesch/aframe-heightgrid-component@master/dist/aframe-heightgrid-component.min.js"></script>
 </head>
 
 <body>
